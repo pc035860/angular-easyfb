@@ -12,8 +12,8 @@ AngularJS + Facebook JavaScript SDK.
 
 #### Demos
 
-* [API Demo](http://plnkr.co/edit/qclqht?p=preview)
-* [XFBML Demo](http://plnkr.co/edit/eak9VY?p=preview)
+* [API demo](http://plnkr.co/edit/qclqht?p=preview)
+* [XFBML demo](http://plnkr.co/edit/eak9VY?p=preview)
 
 ## Getting started
 
