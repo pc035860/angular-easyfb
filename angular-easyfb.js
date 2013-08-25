@@ -100,12 +100,6 @@ angular.module('ezfb', [])
     getInitParams: function () {
       return _config(_initParams);
     },
-    setPublishedApis: function (apis) {
-      _config(_publishedApis, apis);
-    },
-    getPublishedApis: function () {
-      return _config(_publishedApis);
-    },
 
     //////////
     // $get //
