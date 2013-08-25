@@ -1,0 +1,16 @@
+{
+  "name": "angular-easyfb",
+  "description": "Super easy AngularJS + Facebook JavaScript SDK.",
+  "main": "angular-easyfb.js",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "Gruntfile.js",
+    "package.json",
+    "test",
+    "tests"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}
