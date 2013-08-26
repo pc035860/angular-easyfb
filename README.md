@@ -115,6 +115,8 @@ Simply put XFBML contents inside the directive.
 </div>
 ```
 
+##### `ezfb-xfbml` paramater
+
 The directive itself may work as an reload trigger, it will reload hall directive when `ezfb-xfbml` evaluates as `true`.
 
 Moreover, it'll try to reset `ezfb-xfbml` value to `false` after reload triggered(if the value is fed through an scope variable rather than an expression).
