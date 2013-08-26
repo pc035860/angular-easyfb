@@ -5,17 +5,17 @@ angular.module('ezfb', [])
   // ref: https://developers.facebook.com/docs/reference/javascript/
   var _publishedApis = [
     // core
-    'api', 
-    'ui', 
+    'api',
+    'ui',
 
     // auth
-    'getAuthResponse', 
-    'getLoginStatus', 
-    'login', 
-    'logout', 
+    'getAuthResponse',
+    'getLoginStatus',
+    'login',
+    'logout',
 
     // event
-    'Event.subscribe', 
+    'Event.subscribe',
     'Event.unsubscribe',
 
     // xfbml
@@ -45,7 +45,7 @@ angular.module('ezfb', [])
 
   /**
    * Generate namespace route in an object
-   * 
+   *
    * @param  {object} obj   target object
    * @param  {array}  paths ordered path asc
    */
@@ -62,7 +62,7 @@ angular.module('ezfb', [])
 
   /**
    * Getter/setter of a config
-   * 
+   *
    * @param  {object} target to be configured object
    * @param  {object} config configuration(optional)
    * @return {*}             copied target if "config" is not given
@@ -78,7 +78,7 @@ angular.module('ezfb', [])
 
   /**
    * Context and arguments proxy function
-   * 
+   *
    * @param  {function} func    the function
    * @param  {object}   context the context
    * @param  {array}    args    arguments
@@ -212,8 +212,9 @@ angular.module('ezfb', [])
  * @description
  * Parse XFBML inside the directive
  *
- * @param {boolean} ezfb-xfbml Reload trigger for inside XFBML, 
+ * @param {boolean} ezfb-xfbml Reload trigger for inside XFBML,
  *                             should keep only XFBML content inside the directive.
+ * @param {expr}    onrender   Evaluated every time content xfbml gets rendered.
  */
 .directive('ezfbXfbml', [
          '$FB', '$parse', '$compile', '$timeout',
@@ -224,22 +225,52 @@ function ($FB,   $parse,   $compile,   $timeout) {
       var _savedHtml = tElm.html();
 
       return function postLink(scope, iElm, iAttrs) {
+        var _rendering = true,
+            onrenderExp = iAttrs.onrender || '',
+            onrenderHandler = function () {
+              if (_rendering) {
+                scope.$eval(onrenderExp);
+                _rendering = false;
+              }
+            },
+            renderEvent = 'xfbml.render';
+
+        /**
+         * Render event
+         */
+        if (onrenderExp) {
+          // subscribe
+          $FB.Event.subscribe(renderEvent, onrenderHandler);
+
+          // unsubscibe on $destroy
+          iElm.bind('$destroy', function () {
+            $FB.Event.unsubscribe(renderEvent, onrenderHandler);
+
+            iElm.unbind('$destroy');
+          });
+        }
+
         $FB.XFBML.parse(iElm[0]);
 
+        /**
+         * The trigger
+         */
         var setter = $parse(iAttrs.ezfbXfbml).assign;
         scope.$watch(iAttrs.ezfbXfbml, function (val) {
           if (val) {
+            _rendering = true;
             iElm.html(_savedHtml);
 
             $compile(iElm.contents())(scope);
             $timeout(function () {
               $FB.XFBML.parse(iElm[0]);
             });
-            
+
             // reset the trigger if its settable
             (setter || angular.noop)(scope, false);
           }
         }, true);
+
       };
     }
   };
