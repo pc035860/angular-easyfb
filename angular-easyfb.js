@@ -53,7 +53,7 @@ angular.module('ezfb', [])
     if (paths.length === 0) {
       return;
     }
-    path = paths.shift();
+    var path = paths.shift();
     if (!obj[path]) {
       obj[path] = {};
     }
