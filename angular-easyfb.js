@@ -2,38 +2,43 @@ angular.module('ezfb', [])
 
 .provider('$FB', function () {
 
-  // ref: https://developers.facebook.com/docs/reference/javascript/
-  var _publishedApis = [
+  /**
+   * Specify published apis and executable callback argument index
+   * @type {Object}
+   *
+   * ref: https://developers.facebook.com/docs/reference/javascript/
+   */
+  var _publishedApis = {
     // core
-    'api',
-    'ui',
+    api: [1, 2, 3],
+    ui: 1,
 
     // auth
-    'getAuthResponse',
-    'getLoginStatus',
-    'login',
-    'logout',
+    // getAuthResponse: 0,  // deprecated
+    getLoginStatus: 0,
+    login: 0,
+    logout: 0,
 
     // event
-    'Event.subscribe',
-    'Event.unsubscribe',
+    'Event.subscribe': 1,
+    'Event.unsubscribe': -1,
 
     // xfbml
-    'XFBML.parse',
+    'XFBML.parse': -1
 
     // canvas
-    'Canvas.Prefetcher.addStaticResource',
-    'Canvas.Prefetcher.setCollectionMode',
-    'Canvas.hideFlashElement',
-    'Canvas.scrollTo',
-    'Canvas.setAutoGrow',
-    'Canvas.setDoneLoading',
-    'Canvas.setSize',
-    'Canvas.setUrlHandler',
-    'Canvas.showFlashElement',
-    'Canvas.startTimer',
-    'Canvas.stopTimer'
-  ];
+    // 'Canvas.Prefetcher.addStaticResource',
+    // 'Canvas.Prefetcher.setCollectionMode',
+    // 'Canvas.hideFlashElement',
+    // 'Canvas.scrollTo',
+    // 'Canvas.setAutoGrow',
+    // 'Canvas.setDoneLoading',
+    // 'Canvas.setSize',
+    // 'Canvas.setUrlHandler',
+    // 'Canvas.showFlashElement',
+    // 'Canvas.startTimer',
+    // 'Canvas.stopTimer'
+  };
 
   var _initParams = {
     // appId      : '', // App ID from the App Dashboard
@@ -86,7 +91,7 @@ angular.module('ezfb', [])
    */
   function _proxy(func, context, args) {
     return function () {
-      func.apply(context, args);
+      return func.apply(context, args);
     };
   }
 
@@ -149,7 +154,7 @@ angular.module('ezfb', [])
        *
        * Publish FB APIs with auto-check ready state
        */
-      angular.forEach(_publishedApis, function (apiPath) {
+      angular.forEach(_publishedApis, function (cbIndex, apiPath) {
         _pathGen(_$FB, apiPath.split(/\./));
 
         var getter = $parse(apiPath),
@@ -158,28 +163,51 @@ angular.module('ezfb', [])
 
           var args = Array.prototype.slice.call(arguments),
               func = _proxy(function (args) {
-                angular.forEach(args, function (arg, i) {
-                  /**
-                   * Wrap API function arg with angularjs context
-                   */
-                  if (angular.isFunction(arg)) {
-                    var func = arg;
-                    args[i] = function () {
-                      var funcArgs = Array.prototype.slice.call(arguments);
+                var dfd = $q.defer(),
+                    putWithIndex = function (index) {
+                      var func = angular.isFunction(args[index]) ? args[index] : angular.noop,
+                          myFunc = function () {
+                            var funcArgs = Array.prototype.slice.call(arguments);
 
-                      if ($rootScope.$$phase) {
-                        // already in angularjs context
-                        func.apply(null, funcArgs);
+                            if ($rootScope.$$phase) {
+                              // already in angularjs context
+                              func.apply(null, funcArgs);
+                              dfd.resolve.apply(dfd, funcArgs);
+                            }
+                            else {
+                              // not in angularjs context
+                              $rootScope.$apply(function () {
+                                func.apply(null, funcArgs);
+                                dfd.resolve.apply(dfd, funcArgs);
+                              });
+                            }
+                          };
+
+                      while (args.length <= index) {
+                        args.push(null);
                       }
-                      else {
-                        // not in angularjs context
-                        $rootScope.$apply(function () {
-                          func.apply(null, funcArgs);
-                        });
-                      }
+
+                      // replaced
+                      args[index] = myFunc;
                     };
+
+                if (angular.isNumber(cbIndex)) {
+                  putWithIndex(cbIndex);
+                }
+                else if (angular.isArray(cbIndex)) {
+                  var i, c;
+                  for (i = 0; i < cbIndex.length; i++) {
+                    c = cbIndex[i];
+
+                    if (args.length == c ||
+                        args.length == (c + 1) && angular.isFunction(args[c])) {
+
+                      putWithIndex(c);
+
+                      break;
+                    }
                   }
-                });
+                }
 
                 /**
                  * Apply back to original FB SDK
@@ -190,12 +218,13 @@ angular.module('ezfb', [])
                 }
                 origFBFunc.apply($window.FB, args);
 
+                return dfd.promise;
               }, null, [args]);
 
           /**
            * Wrap the api function with our ready promise
            */
-          _initReady.promise.then(func);
+          return _initReady.promise.then(func);
         });
       });
 
