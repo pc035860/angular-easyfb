@@ -1,9 +1,11 @@
+/*global module*/
 module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     jshint: {
       options: {
-        curly: true
+        curly: true,
+        jshintrc: '.jshintrc'
       },
       beforeuglify: ['<%= pkg.name %>.js'],
       gruntfile: ['Gruntfile.js']
@@ -27,11 +29,11 @@ module.exports = function(grunt) {
     watch: {
       gruntfile: {
         files: 'Gruntfile.js',
-        tasks: ['jshint:gruntfile'],
+        tasks: ['jshint:gruntfile']
       },
       src: {
         files: '<%= pkg.name %>.js',
-        tasks: ['default'],
+        tasks: ['default']
       }
     },
     connect: {
