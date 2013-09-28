@@ -28,17 +28,9 @@ Add `ezfb` to your app module's dependency.
 angular.module('myApp', ['ezfb']);
 ```
 
-##### Install with Bower
-
-The official bower package of AngularJS hasn't support unstable branch, hence for the current version of `angular-easyfb` package, no dependency is specified.
+### Install with Bower
 
 ```sh
-# install AngularJS (stable)
-bower install angular
-# or (unstable)
-bower install PatternConsulting/bower-angular
-
-# install angular-easyfb
 bower install angular-easyfb
 ```
 
@@ -46,7 +38,7 @@ bower install angular-easyfb
 
 ### `$FB` service
 
-##### FB.init parameters setup with $FBProvider
+#### FB.init parameters setup with $FBProvider
 
 Setup the parameters at AngularJS configuration state with `$FBProvider`.
 
@@ -61,7 +53,7 @@ angular.module('myApp')
 })
 ```
 
-##### using $FB
+#### using $FB
 
 This is the original `FB` wrapping service, all `FB.*` APIs are available through `$FB.*`.
 
@@ -95,6 +87,51 @@ angular.module('myApp')
 
 Watch the [demo](http://plnkr.co/edit/qclqht?p=preview) to see it in action.
 
+#### $q promise support
+
+Support of $q promise create more possibility for `$FB` service.
+
+**Only the APIs with callback support returning promise.**
+
+##### Combine multiple api calls
+```js
+$q.all([
+  $FB.api('/me'),
+  $FB.api('/me/likes')
+])
+.then(function (rsvList) {
+  // result of api('/me')
+  console.log(rsvList[0]);
+
+  // result of api('/me/likes')
+  console.log(rsvList[1]);
+});
+```
+
+##### Convenient view integration
+
+```js
+/**
+ * In controller
+ */
+$scope.me = $FB.getLoginStatus()
+  .then(function () { 
+    return $FB.api('/me');
+  });
+```
+
+```html
+<!-- In view template -->
+<p>{{ me.name }}</p>
+```
+
+Output:
+```html
+<p>Robin Fan</p>
+```
+
+Watch the [promise version api demo](http://plnkr.co/edit/UMUtFc?p=preview) to see them in action.
+
 ### `ezfb-xfbml` directive
 
 ```
@@ -115,7 +152,7 @@ Simply put XFBML contents inside the directive.
 </div>
 ```
 
-##### `ezfb-xfbml` paramater
+#### `ezfb-xfbml` paramater
 
 The directive itself may work as an reload trigger, it will reload directive contents when `ezfb-xfbml` evaluates as `true`.
 
@@ -133,7 +170,7 @@ Moreover, it'll try to reset `ezfb-xfbml` value to `false` after reload triggere
 </div>
 ```
 
-##### `onrender` parameter
+#### `onrender` parameter
 
 `onrender` expression will be evaluated every time the `ezfb-xfbml` target gets rendered(via FB event `xfbml.render`).
 
@@ -151,3 +188,12 @@ Moreover, it'll try to reset `ezfb-xfbml` value to `false` after reload triggere
 ```
 
 Watch the [demo](http://plnkr.co/edit/eak9VY?p=preview) to see them in action.
+
+## Changelog
+
+See the changelog [here](https://github.com/pc035860/angular-easyfb/blob/master/CHANGELOG.md).
+
+## Todo
+
+* Test
+* Better documentation?
