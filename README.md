@@ -8,7 +8,7 @@ AngularJS + Facebook JavaScript SDK.
 * Seemless FB SDK initialization(asynchronouslly load script and FB.init)
 * All SDK API callbacks are automatically applied with AngularJS context
 * Bundled a handy directive for parsing Facebook XFBML plugins dynamically
-
+* Support both callback and $q promise
 
 #### Demos
 
