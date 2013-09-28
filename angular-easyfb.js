@@ -1,10 +1,12 @@
+/*global angular*/
 angular.module('ezfb', [])
 
 .provider('$FB', function () {
 
+  var NO_CALLBACK = -1;
+
   /**
    * Specify published apis and executable callback argument index
-   * @type {Object}
    *
    * ref: https://developers.facebook.com/docs/reference/javascript/
    */
@@ -21,23 +23,23 @@ angular.module('ezfb', [])
 
     // event
     'Event.subscribe': 1,
-    'Event.unsubscribe': -1,
+    'Event.unsubscribe': NO_CALLBACK,
 
     // xfbml
-    'XFBML.parse': -1
+    'XFBML.parse': NO_CALLBACK,
 
     // canvas
-    // 'Canvas.Prefetcher.addStaticResource',
-    // 'Canvas.Prefetcher.setCollectionMode',
-    // 'Canvas.hideFlashElement',
-    // 'Canvas.scrollTo',
-    // 'Canvas.setAutoGrow',
-    // 'Canvas.setDoneLoading',
-    // 'Canvas.setSize',
-    // 'Canvas.setUrlHandler',
-    // 'Canvas.showFlashElement',
-    // 'Canvas.startTimer',
-    // 'Canvas.stopTimer'
+    'Canvas.Prefetcher.addStaticResource': NO_CALLBACK,
+    'Canvas.Prefetcher.setCollectionMode': NO_CALLBACK,
+    'Canvas.hideFlashElement': NO_CALLBACK,
+    'Canvas.scrollTo': NO_CALLBACK,
+    'Canvas.setAutoGrow': NO_CALLBACK,
+    'Canvas.setDoneLoading': 0,
+    'Canvas.setSize': NO_CALLBACK,
+    'Canvas.setUrlHandler': 0,
+    'Canvas.showFlashElement': NO_CALLBACK,
+    'Canvas.startTimer': NO_CALLBACK,
+    'Canvas.stopTimer': 0
   };
 
   var _initParams = {
@@ -136,7 +138,7 @@ angular.module('ezfb', [])
       }($document[0]));
 
       $window.fbAsyncInit = function () {
-        // init the FB JS SDK
+        // Initialize the FB JS SDK
         $window.FB.init(_initParams);
 
         _$FB.$$ready = true;
@@ -154,7 +156,7 @@ angular.module('ezfb', [])
        *
        * Publish FB APIs with auto-check ready state
        */
-      angular.forEach(_publishedApis, function (cbIndex, apiPath) {
+      angular.forEach(_publishedApis, function (cbArgIndex, apiPath) {
         _pathGen(_$FB, apiPath.split(/\./));
 
         var getter = $parse(apiPath),
@@ -162,8 +164,13 @@ angular.module('ezfb', [])
         setter(_$FB, function () {
 
           var args = Array.prototype.slice.call(arguments),
-              func = _proxy(function (args) {
+              apiCall = _proxy(function (args) {
                 var dfd = $q.defer(),
+                    /**
+                     * Add or replce original callback function with deferred resolve
+                     * 
+                     * @param  {number} index expected api callback index
+                     */
                     putWithIndex = function (index) {
                       var func = angular.isFunction(args[index]) ? args[index] : angular.noop,
                           myFunc = function () {
@@ -187,24 +194,32 @@ angular.module('ezfb', [])
                         args.push(null);
                       }
 
-                      // replaced
+                      // Replace the original one (or null) with myFunc
                       args[index] = myFunc;
                     };
 
-                if (angular.isNumber(cbIndex)) {
-                  putWithIndex(cbIndex);
-                }
-                else if (angular.isArray(cbIndex)) {
-                  var i, c;
-                  for (i = 0; i < cbIndex.length; i++) {
-                    c = cbIndex[i];
+                if (cbArgIndex !== NO_CALLBACK) {
+                  if (angular.isNumber(cbArgIndex)) {
+                    /**
+                     * Constant callback argument index
+                     */
+                    putWithIndex(cbArgIndex);
+                  }
+                  else if (angular.isArray(cbArgIndex)) {
+                    /**
+                     * Multiple possible callback argument index
+                     */
+                    var i, c;
+                    for (i = 0; i < cbArgIndex.length; i++) {
+                      c = cbArgIndex[i];
 
-                    if (args.length == c ||
-                        args.length == (c + 1) && angular.isFunction(args[c])) {
+                      if (args.length == c ||
+                          args.length == (c + 1) && angular.isFunction(args[c])) {
 
-                      putWithIndex(c);
+                        putWithIndex(c);
 
-                      break;
+                        break;
+                      }
                     }
                   }
                 }
@@ -224,7 +239,13 @@ angular.module('ezfb', [])
           /**
            * Wrap the api function with our ready promise
            */
-          return _initReady.promise.then(func);
+          if (cbArgIndex === NO_CALLBACK) {
+            // Do not return promise for no-callback apis
+            _initReady.promise.then(apiCall); 
+          }
+          else {
+            return _initReady.promise.then(apiCall);
+          }
         });
       });
 
@@ -268,10 +289,10 @@ function ($FB,   $parse,   $compile,   $timeout) {
          * Render event
          */
         if (onrenderExp) {
-          // subscribe
+          // Subscribe
           $FB.Event.subscribe(renderEvent, onrenderHandler);
 
-          // unsubscibe on $destroy
+          // Unsubscibe on $destroy
           iElm.bind('$destroy', function () {
             $FB.Event.unsubscribe(renderEvent, onrenderHandler);
 
@@ -295,7 +316,7 @@ function ($FB,   $parse,   $compile,   $timeout) {
               $FB.XFBML.parse(iElm[0]);
             });
 
-            // reset the trigger if its settable
+            // Reset the trigger if it's settable
             (setter || angular.noop)(scope, false);
           }
         }, true);
