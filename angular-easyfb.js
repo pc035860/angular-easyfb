@@ -42,6 +42,8 @@ angular.module('ezfb', [])
     'Canvas.stopTimer': 0
   };
 
+  var _locale = 'en_US';
+
   var _initParams = {
     // appId      : '', // App ID from the App Dashboard
     // channelUrl : '', // Channel File for x-domain communication
@@ -108,6 +110,13 @@ angular.module('ezfb', [])
       return _config(_initParams);
     },
 
+    setLocale: function(locale) {
+      _locale = locale;
+    },
+    getLocale: function() {
+      return _locale;
+    },
+
     //////////
     // $get //
     //////////
@@ -133,7 +142,7 @@ angular.module('ezfb', [])
         var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
         if (d.getElementById(id)) {return;}
         js = d.createElement('script'); js.id = id; js.async = true;
-        js.src = "//connect.facebook.net/en_US/all.js";
+        js.src = "//connect.facebook.net/" + _locale + "/all.js";
         ref.parentNode.insertBefore(js, ref);
       }($document[0]));
 
