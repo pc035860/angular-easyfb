@@ -42,6 +42,8 @@ angular.module('ezfb', [])
     'Canvas.stopTimer': 0
   };
 
+  var _locale = 'en_US';
+
   var _initParams = {
     // appId      : '', // App ID from the App Dashboard
     // channelUrl : '', // Channel File for x-domain communication
@@ -108,6 +110,13 @@ angular.module('ezfb', [])
       return _config(_initParams);
     },
 
+    setLocale: function(locale) {
+      _locale = locale;
+    },
+    getLocale: function() {
+      return _locale;
+    },
+
     //////////
     // $get //
     //////////
@@ -115,9 +124,10 @@ angular.module('ezfb', [])
              '$window', '$q', '$document', '$parse', '$rootScope',
     function ($window,   $q,   $document,   $parse,   $rootScope) {
       var _initReady, _$FB;
+      var _paramsReady = $q.defer();
 
-      if (!_initParams.appId) {
-        throw new Error('appId required.');
+      if (_initParams.appId) {
+        _paramsReady.resolve();
       }
 
       /**
@@ -133,22 +143,26 @@ angular.module('ezfb', [])
         var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
         if (d.getElementById(id)) {return;}
         js = d.createElement('script'); js.id = id; js.async = true;
-        js.src = "//connect.facebook.net/en_US/all.js";
+        js.src = "//connect.facebook.net/" + _locale + "/all.js";
         ref.parentNode.insertBefore(js, ref);
       }($document[0]));
 
       $window.fbAsyncInit = function () {
-        // Initialize the FB JS SDK
-        $window.FB.init(_initParams);
+        _paramsReady.promise.then(function() {
+          // Initialize the FB JS SDK
+          $window.FB.init(_initParams);
 
-        _$FB.$$ready = true;
-        $rootScope.$apply(function () {
+          _$FB.$$ready = true;
           _initReady.resolve();
         });
       };
 
       _$FB = {
-        $$ready: false
+        $$ready: false,
+        init: function (params) {
+          _config(_initParams, params);
+          _paramsReady.resolve();
+        }
       };
 
       /**
