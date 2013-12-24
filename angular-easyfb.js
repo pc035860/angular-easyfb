@@ -159,7 +159,7 @@ angular.module('ezfb', [])
 
       _$FB = {
         $$ready: false,
-        setInitParams: function (params) {
+        init: function (params) {
           _config(_initParams, params);
           _paramsReady.resolve();
         }
