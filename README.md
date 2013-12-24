@@ -39,9 +39,11 @@ bower install angular-easyfb
 
 ### `$FB` service
 
-#### FB.init parameters setup with $FBProvider
+#### Configuration
 
-Setup the parameters at AngularJS configuration state with `$FBProvider`.
+###### `getInitParams` / `setInitParams`
+
+Configure paramters for the original `FB.init` with `$FBProvider.setInitParams`. (See also [`$FB.init`](#fbinit))
 
 ```js
 angular.module('myApp')
@@ -51,14 +53,43 @@ angular.module('myApp')
     // This is my FB app id for plunker demo app
     appId: '386469651480295'
   });  
-})
+});
 ```
+
+###### `getLocale` / `setLocale`
+
+Configure the locale of the original FB script file. Default locale is `en_US`.
+
+```js
+angular.module('myApp')
+
+.config(function ($FBProvider) {
+  $FBProvider.setLocale('zh_TW');
+});
+```
+
+#### $FB.init
+
+In the case that you don't want to(or you can't) configure your `FB.init` parameters in configuration block, you may use `$FB.init` in run block. And any `$FB` API call will not run until `$FB.init` is called.
+
+```js
+angular.module('myApp')
+
+.run(function ($FB) {
+  $FB.init({
+    // This is my FB app id for plunker demo app
+    appId: '386469651480295'
+  });  
+});
+```
+
 
 #### using $FB
 
 This is the original `FB` wrapping service, all `FB.*` APIs are available through `$FB.*`.
 
-No need to worry about FB script loading, FB.init and Angular context applying at all.
+No need to worry about FB script loading and Angular context applying at all.
+
 
 ```js
 angular.module('myApp')
@@ -109,7 +140,7 @@ $q.all([
 });
 ```
 
-##### Convenient view integration
+##### Convenient view integration (deprecated in AngularJS 1.2.0-rc3)
 
 ```js
 /**
