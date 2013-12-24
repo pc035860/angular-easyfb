@@ -124,9 +124,10 @@ angular.module('ezfb', [])
              '$window', '$q', '$document', '$parse', '$rootScope',
     function ($window,   $q,   $document,   $parse,   $rootScope) {
       var _initReady, _$FB;
+      var _paramsReady = $q.defer();
 
-      if (!_initParams.appId) {
-        throw new Error('appId required.');
+      if (_initParams.appId) {
+        _paramsReady.resolve();
       }
 
       /**
@@ -147,17 +148,23 @@ angular.module('ezfb', [])
       }($document[0]));
 
       $window.fbAsyncInit = function () {
-        // Initialize the FB JS SDK
-        $window.FB.init(_initParams);
+        _paramsReady.promise.then(function() {
+          // Initialize the FB JS SDK
+          $window.FB.init(_initParams);
 
-        _$FB.$$ready = true;
-        $rootScope.$apply(function () {
-          _initReady.resolve();
+          _$FB.$$ready = true;
+          $rootScope.$apply(function () {
+            _initReady.resolve();
+          });
         });
       };
 
       _$FB = {
-        $$ready: false
+        $$ready: false,
+        setInitParams: function (params) {
+          _config(_initParams, params);
+          _paramsReady.resolve();
+        }
       };
 
       /**
