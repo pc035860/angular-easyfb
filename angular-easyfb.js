@@ -153,9 +153,7 @@ angular.module('ezfb', [])
           $window.FB.init(_initParams);
 
           _$FB.$$ready = true;
-          $rootScope.$apply(function () {
-            _initReady.resolve();
-          });
+          _initReady.resolve();
         });
       };
 
