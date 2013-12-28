@@ -42,8 +42,10 @@ angular.module('ezfb', [])
     'Canvas.stopTimer': 0
   };
 
+  // Default locale
   var _locale = 'en_US';
 
+  // Default init parameters
   var _initParams = {
     // appId      : '', // App ID from the App Dashboard
     // channelUrl : '', // Channel File for x-domain communication
@@ -51,6 +53,13 @@ angular.module('ezfb', [])
     cookie     : true, // set sessions cookies to allow your server to access the session?
     xfbml      : true  // parse XFBML tags on this page?
   };
+  
+  // Default init function
+  var _defaultInitFunction = ['$window', '$fbInitParams', function ($window, $fbInitParams) {
+    // Initialize the FB JS SDK
+    $window.FB.init($fbInitParams);
+  }];
+  var _initFunction = _defaultInitFunction;
 
   /**
    * Generate namespace route in an object
@@ -116,17 +125,29 @@ angular.module('ezfb', [])
     getLocale: function() {
       return _locale;
     },
+    
+    setInitFunction: function (func) {
+      if (angular.isArray(func) || angular.isFunction(func)) {
+        _initFunction = func;
+      }
+      else {
+        throw new Error('Init function type error.');
+      }
+    },
+    getInitFunction: function () {
+      return _initFunction;
+    },
 
     //////////
     // $get //
     //////////
     $get: [
-             '$window', '$q', '$document', '$parse', '$rootScope',
-    function ($window,   $q,   $document,   $parse,   $rootScope) {
+             '$window', '$q', '$document', '$parse', '$rootScope', '$injector',
+    function ($window,   $q,   $document,   $parse,   $rootScope,   $injector) {
       var _initReady, _$FB;
       var _paramsReady = $q.defer();
 
-      if (_initParams.appId) {
+      if (_initParams.appId || _initFunction !== _defaultInitFunction) {
         _paramsReady.resolve();
       }
 
@@ -149,8 +170,8 @@ angular.module('ezfb', [])
 
       $window.fbAsyncInit = function () {
         _paramsReady.promise.then(function() {
-          // Initialize the FB JS SDK
-          $window.FB.init(_initParams);
+          // Run init function
+          $injector.invoke(_initFunction, null, {'$fbInitParams': _initParams});
 
           _$FB.$$ready = true;
           _initReady.resolve();
