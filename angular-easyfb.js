@@ -23,7 +23,7 @@ angular.module('ezfb', [])
 
     // event
     'Event.subscribe': 1,
-    'Event.unsubscribe': NO_CALLBACK,
+    'Event.unsubscribe': 1,  // not quite a callback though
 
     // xfbml
     'XFBML.parse': NO_CALLBACK,
@@ -144,7 +144,9 @@ angular.module('ezfb', [])
     $get: [
              '$window', '$q', '$document', '$parse', '$rootScope', '$injector',
     function ($window,   $q,   $document,   $parse,   $rootScope,   $injector) {
-      var _initReady, _$FB;
+      var _initReady, _$FB, 
+          _savedListeners = {};
+
       var _paramsReady = $q.defer();
 
       if (_initParams.appId || _initFunction !== _defaultInitFunction) {
@@ -208,7 +210,7 @@ angular.module('ezfb', [])
                      */
                     putWithIndex = function (index) {
                       var func = angular.isFunction(args[index]) ? args[index] : angular.noop,
-                          myFunc = function () {
+                          newFunc = function () {
                             var funcArgs = Array.prototype.slice.call(arguments);
 
                             if ($rootScope.$$phase) {
@@ -229,8 +231,38 @@ angular.module('ezfb', [])
                         args.push(null);
                       }
 
-                      // Replace the original one (or null) with myFunc
-                      args[index] = myFunc;
+                      /**
+                       * `FB.Event.unsubscribe` requires the original listener function.
+                       * Save the mapping of original->wrapped on `FB.Event.subscribe` for unsubscribing.
+                       */
+                      var eventName;
+                      if (apiPath === 'Event.subscribe') {
+                        eventName = args[0];
+                        if (angular.isUndefined(_savedListeners[eventName])) {
+                          _savedListeners[eventName] = [];
+                        }
+                        _savedListeners[eventName].push({
+                          original: func,
+                          wrapped: newFunc
+                        });
+                      }
+                      else if (apiPath === 'Event.unsubscribe') {
+                        eventName = args[0];
+                        if (angular.isArray(_savedListeners[eventName])) {
+                          var i, subscribed, l = _savedListeners[eventName].length;
+                          for (i = 0; i < l; i++) {
+                            subscribed = _savedListeners[eventName][i];
+                            if (subscribed.original === func) {
+                              newFunc = subscribed.wrapped;
+                              _savedListeners[eventName].splice(i, 1);
+                              break;
+                            }
+                          }
+                        }
+                      }
+
+                      // Replace the original one (or null) with newFunc
+                      args[index] = newFunc;
                     };
 
                 if (cbArgIndex !== NO_CALLBACK) {
