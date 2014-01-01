@@ -1,6 +1,6 @@
 {
   "name": "angular-easyfb",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Super easy AngularJS + Facebook JavaScript SDK.",
   "main": "index.js",
   "directories": {},
