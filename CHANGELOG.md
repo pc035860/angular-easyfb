@@ -1,3 +1,8 @@
+## v0.2.2
+
+* `setInitFunction()` in configure block for initialization customization
+* Make `$FB.Event.unsubscribe` unsubscribes events properly
+
 ## v0.2.1
 
 * `setLocale()` in configure block
