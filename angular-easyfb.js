@@ -208,7 +208,7 @@ angular.module('ezfb', [])
                      * 
                      * @param  {number} index expected api callback index
                      */
-                    putWithIndex = function (index) {
+                    replaceCallbackAt = function (index) {
                       var func = angular.isFunction(args[index]) ? args[index] : angular.noop,
                           newFunc = function () {
                             var funcArgs = Array.prototype.slice.call(arguments);
@@ -270,7 +270,7 @@ angular.module('ezfb', [])
                     /**
                      * Constant callback argument index
                      */
-                    putWithIndex(cbArgIndex);
+                    replaceCallbackAt(cbArgIndex);
                   }
                   else if (angular.isArray(cbArgIndex)) {
                     /**
@@ -283,7 +283,7 @@ angular.module('ezfb', [])
                       if (args.length == c ||
                           args.length == (c + 1) && angular.isFunction(args[c])) {
 
-                        putWithIndex(c);
+                        replaceCallbackAt(c);
 
                         break;
                       }
