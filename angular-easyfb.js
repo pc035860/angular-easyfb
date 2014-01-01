@@ -23,7 +23,7 @@ angular.module('ezfb', [])
 
     // event
     'Event.subscribe': 1,
-    'Event.unsubscribe': NO_CALLBACK,
+    'Event.unsubscribe': 1,  // not quite a callback though
 
     // xfbml
     'XFBML.parse': NO_CALLBACK,
@@ -42,8 +42,10 @@ angular.module('ezfb', [])
     'Canvas.stopTimer': 0
   };
 
+  // Default locale
   var _locale = 'en_US';
 
+  // Default init parameters
   var _initParams = {
     // appId      : '', // App ID from the App Dashboard
     // channelUrl : '', // Channel File for x-domain communication
@@ -51,6 +53,13 @@ angular.module('ezfb', [])
     cookie     : true, // set sessions cookies to allow your server to access the session?
     xfbml      : true  // parse XFBML tags on this page?
   };
+  
+  // Default init function
+  var _defaultInitFunction = ['$window', '$fbInitParams', function ($window, $fbInitParams) {
+    // Initialize the FB JS SDK
+    $window.FB.init($fbInitParams);
+  }];
+  var _initFunction = _defaultInitFunction;
 
   /**
    * Generate namespace route in an object
@@ -116,17 +125,31 @@ angular.module('ezfb', [])
     getLocale: function() {
       return _locale;
     },
+    
+    setInitFunction: function (func) {
+      if (angular.isArray(func) || angular.isFunction(func)) {
+        _initFunction = func;
+      }
+      else {
+        throw new Error('Init function type error.');
+      }
+    },
+    getInitFunction: function () {
+      return _initFunction;
+    },
 
     //////////
     // $get //
     //////////
     $get: [
-             '$window', '$q', '$document', '$parse', '$rootScope',
-    function ($window,   $q,   $document,   $parse,   $rootScope) {
-      var _initReady, _$FB;
+             '$window', '$q', '$document', '$parse', '$rootScope', '$injector',
+    function ($window,   $q,   $document,   $parse,   $rootScope,   $injector) {
+      var _initReady, _$FB, 
+          _savedListeners = {};
+
       var _paramsReady = $q.defer();
 
-      if (_initParams.appId) {
+      if (_initParams.appId || _initFunction !== _defaultInitFunction) {
         _paramsReady.resolve();
       }
 
@@ -149,8 +172,8 @@ angular.module('ezfb', [])
 
       $window.fbAsyncInit = function () {
         _paramsReady.promise.then(function() {
-          // Initialize the FB JS SDK
-          $window.FB.init(_initParams);
+          // Run init function
+          $injector.invoke(_initFunction, null, {'$fbInitParams': _initParams});
 
           _$FB.$$ready = true;
           _initReady.resolve();
@@ -185,9 +208,9 @@ angular.module('ezfb', [])
                      * 
                      * @param  {number} index expected api callback index
                      */
-                    putWithIndex = function (index) {
+                    replaceCallbackAt = function (index) {
                       var func = angular.isFunction(args[index]) ? args[index] : angular.noop,
-                          myFunc = function () {
+                          newFunc = function () {
                             var funcArgs = Array.prototype.slice.call(arguments);
 
                             if ($rootScope.$$phase) {
@@ -208,8 +231,38 @@ angular.module('ezfb', [])
                         args.push(null);
                       }
 
-                      // Replace the original one (or null) with myFunc
-                      args[index] = myFunc;
+                      /**
+                       * `FB.Event.unsubscribe` requires the original listener function.
+                       * Save the mapping of original->wrapped on `FB.Event.subscribe` for unsubscribing.
+                       */
+                      var eventName;
+                      if (apiPath === 'Event.subscribe') {
+                        eventName = args[0];
+                        if (angular.isUndefined(_savedListeners[eventName])) {
+                          _savedListeners[eventName] = [];
+                        }
+                        _savedListeners[eventName].push({
+                          original: func,
+                          wrapped: newFunc
+                        });
+                      }
+                      else if (apiPath === 'Event.unsubscribe') {
+                        eventName = args[0];
+                        if (angular.isArray(_savedListeners[eventName])) {
+                          var i, subscribed, l = _savedListeners[eventName].length;
+                          for (i = 0; i < l; i++) {
+                            subscribed = _savedListeners[eventName][i];
+                            if (subscribed.original === func) {
+                              newFunc = subscribed.wrapped;
+                              _savedListeners[eventName].splice(i, 1);
+                              break;
+                            }
+                          }
+                        }
+                      }
+
+                      // Replace the original one (or null) with newFunc
+                      args[index] = newFunc;
                     };
 
                 if (cbArgIndex !== NO_CALLBACK) {
@@ -217,7 +270,7 @@ angular.module('ezfb', [])
                     /**
                      * Constant callback argument index
                      */
-                    putWithIndex(cbArgIndex);
+                    replaceCallbackAt(cbArgIndex);
                   }
                   else if (angular.isArray(cbArgIndex)) {
                     /**
@@ -230,7 +283,7 @@ angular.module('ezfb', [])
                       if (args.length == c ||
                           args.length == (c + 1) && angular.isFunction(args[c])) {
 
-                        putWithIndex(c);
+                        replaceCallbackAt(c);
 
                         break;
                       }
