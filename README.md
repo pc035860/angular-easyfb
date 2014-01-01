@@ -41,6 +41,18 @@ bower install angular-easyfb
 
 #### Configuration
 
+###### `getLocale` / `setLocale`
+
+Configure the locale of the original FB script file. Default locale is `en_US`.
+
+```js
+angular.module('myApp')
+
+.config(function ($FBProvider) {
+  $FBProvider.setLocale('zh_TW');
+});
+```
+
 ###### `getInitParams` / `setInitParams`
 
 Configure paramters for the original `FB.init` with `$FBProvider.setInitParams`. (See also [`$FB.init`](#fbinit))
@@ -56,15 +68,34 @@ angular.module('myApp')
 });
 ```
 
-###### `getLocale` / `setLocale`
+###### `getInitFunction` / `setInitFunction`
 
-Configure the locale of the original FB script file. Default locale is `en_US`.
+Customize the original `FB.init` function call with services injection support. The initialization parameters set in `setInitParams` are available via local injection `$fbInitParams`.
 
+```js
+// Default init function
+var _defaultInitFunction = ['$window', '$fbInitParams', function ($window, $fbInitParams) {
+  // Initialize the FB JS SDK
+  $window.FB.init($fbInitParams);
+}];
+```
+
+Customization example:
 ```js
 angular.module('myApp')
 
 .config(function ($FBProvider) {
-  $FBProvider.setLocale('zh_TW');
+  var myInitFunction = function ($window, $rootScope, $fbInitParams) {
+    $window.FB.init({
+      appId: '386469651480295'
+    });
+    // or
+    // $window.FB.init($fbInitParams);
+
+    $rootScope.$broadcast('$onFBInit');
+  };
+
+  $FBProvider.setInitFunction(myInitFunction);
 });
 ```
 
