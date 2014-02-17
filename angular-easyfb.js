@@ -16,7 +16,7 @@ angular.module('ezfb', [])
     ui: 1,
 
     // auth
-    // getAuthResponse: 0,  // deprecated
+    getAuthResponse: NO_CALLBACK,
     getLoginStatus: 0,
     login: 0,
     logout: 0,
@@ -305,8 +305,16 @@ angular.module('ezfb', [])
 
           /**
            * Wrap the api function with our ready promise
+           *
+           * The only exception is `getAuthResponse`, which doesn't rely on a callback function to get the response
            */
-          if (cbArgIndex === NO_CALLBACK) {
+          if (apiPath === 'getAuthResponse') {
+            if (angular.isUndefined($window.FB)) {
+              throw new Error('`FB` is not ready.');
+            }
+            return $window.FB.getAuthResponse();
+          }
+          else if (cbArgIndex === NO_CALLBACK) {
             // Do not return promise for no-callback apis
             _initReady.promise.then(apiCall); 
           }

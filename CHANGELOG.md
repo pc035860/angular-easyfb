@@ -1,3 +1,7 @@
+## v0.2.3
+
+* Implement `$FB.getAuthResponse()` which maps to [`FB.getAuthResponse()`](https://developers.facebook.com/docs/reference/javascript/FB.getAuthResponse/)
+
 ## v0.2.2
 
 * `setInitFunction()` in configure block for initialization customization
