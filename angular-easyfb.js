@@ -27,7 +27,7 @@
       'Event.unsubscribe': 1,  // not quite a callback though
 
       // xfbml
-      'XFBML.parse': NO_CALLBACK,
+      'XFBML.parse': 1,
 
       // canvas
       'Canvas.Prefetcher.addStaticResource': NO_CALLBACK,
@@ -168,6 +168,7 @@
           if (d.getElementById(id)) {return;}
           js = d.createElement('script'); js.id = id; js.async = true;
           js.src = "//connect.facebook.net/" + _locale + "/all.js";
+          // js.src = "//connect.facebook.net/en_US/all/debug.js";
           ref.parentNode.insertBefore(js, ref);
         }($document[0]));
 
@@ -355,31 +356,18 @@
 
         return function postLink(scope, iElm, iAttrs) {
           var _rendering = true,
-              onrenderExp = iAttrs.onrender || '',
+              onrenderExp = iAttrs.onrender,
               onrenderHandler = function () {
                 if (_rendering) {
-                  scope.$eval(onrenderExp);
+                  if (onrenderExp) {
+                    scope.$eval(onrenderExp);
+                  }
+                  
                   _rendering = false;
                 }
-              },
-              renderEvent = 'xfbml.render';
+              };
 
-          /**
-           * Render event
-           */
-          if (onrenderExp) {
-            // Subscribe
-            $FB.Event.subscribe(renderEvent, onrenderHandler);
-
-            // Unsubscibe on $destroy
-            iElm.bind('$destroy', function () {
-              $FB.Event.unsubscribe(renderEvent, onrenderHandler);
-
-              iElm.unbind('$destroy');
-            });
-          }
-
-          $FB.XFBML.parse(iElm[0]);
+          $FB.XFBML.parse(iElm[0], onrenderHandler);
 
           /**
            * The trigger
@@ -392,7 +380,7 @@
 
               $compile(iElm.contents())(scope);
               $timeout(function () {
-                $FB.XFBML.parse(iElm[0]);
+                $FB.XFBML.parse(iElm[0], onrenderHandler);
               });
 
               // Reset the trigger if it's settable
@@ -406,9 +394,28 @@
   }]);
 
   var creatSocialPluginDirective = function (dirName) {
+    var CLASS_WRAP_SPAN = 'ezfb-social-plugin-wrap',
+        STYLE_WRAP_SPAN = 'display: inline-block; width: 0; height: 0; overflow: hidden;';
+    
+    /**
+     * Wrap-related functions
+     */
+    var _wrap = function ($elm) {
+          var tmpl = '<span class="'+CLASS_WRAP_SPAN+'" style="'+STYLE_WRAP_SPAN+'">';
+          return $elm.wrap(tmpl).parent();
+        },
+        _isWrapped = function ($elm) {
+          return $elm.parent().hasClass(CLASS_WRAP_SPAN);
+        },
+        _unwrap = function ($elm) {
+          var $parent = $elm.parent();
+          $parent.after($elm).remove();
+          return $elm;
+        };
+    
     module.directive(dirName, [
-             '$FB', '$parse', '$compile', '$timeout',
-    function ($FB,   $parse,   $compile,   $timeout) {
+             '$FB',
+    function ($FB) {
       return {
         restrict: 'EC',
         require: '?^ezfbXfbml',
@@ -420,32 +427,27 @@
             return;
           }
 
-          var _rendering = true,
-              onrenderExp = iAttrs.onrender || '',
+          var rendering = true,
+              onrenderExp = iAttrs.onrender,
               onrenderHandler = function () {
-                if (_rendering) {
-                  scope.$eval(onrenderExp);
-                  _rendering = false;
+                if (rendering) {
+                  if (onrenderExp) {
+                    scope.$eval(onrenderExp);
+                  }
+
+                  rendering = false;
+                  _unwrap(iElm);
                 }
-              },
-              renderEvent = 'xfbml.render';
+              };
 
-          /**
-           * Render event
-           */
-          if (onrenderExp) {
-            // Subscribe
-            $FB.Event.subscribe(renderEvent, onrenderHandler);
+          // Unwrap on $destroy
+          iElm.bind('$destroy', function () {
+            if (_isWrapped(iElm)) {
+              _unwrap(iElm);
+            }
+          });
 
-            // Unsubscibe on $destroy
-            iElm.bind('$destroy', function () {
-              $FB.Event.unsubscribe(renderEvent, onrenderHandler);
-
-              iElm.unbind('$destroy');
-            });
-          }
-
-          $FB.XFBML.parse(iElm[0]);
+          $FB.XFBML.parse(_wrap(iElm)[0], onrenderHandler);
         }
       };
     }]);
