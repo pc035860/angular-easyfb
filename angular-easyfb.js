@@ -62,6 +62,9 @@
     }];
     var _initFunction = _defaultInitFunction;
 
+    // Default to load FB JS SDK
+    var _loadSDK = true;
+
     /**
      * Generate namespace route in an object
      *
@@ -127,6 +130,13 @@
         return _locale;
       },
       
+      setLoadSDK: function (loadSDK) {
+        _loadSDK = !!loadSDK;
+      },
+      getLoadSDK: function () {
+        return _loadSDK;
+      },
+
       setInitFunction: function (func) {
         if (angular.isArray(func) || angular.isFunction(func)) {
           _initFunction = func;
@@ -145,10 +155,11 @@
       $get: [
                '$window', '$q', '$document', '$parse', '$rootScope', '$injector',
       function ($window,   $q,   $document,   $parse,   $rootScope,   $injector) {
-        var _initReady, _$FB, 
-            _savedListeners = {};
+        var _initReady, _$FB, _savedListeners, _paramsReady, asyncInit;
 
-        var _paramsReady = $q.defer();
+        _savedListeners = {};
+
+        _paramsReady = $q.defer();
 
         if (_initParams.appId || _initFunction !== _defaultInitFunction) {
           _paramsReady.resolve();
@@ -162,17 +173,8 @@
         }
 
         _initReady = $q.defer();
-        // Load the SDK's source Asynchronously
-        (function(d){
-          var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
-          if (d.getElementById(id)) {return;}
-          js = d.createElement('script'); js.id = id; js.async = true;
-          js.src = "//connect.facebook.net/" + _locale + "/all.js";
-          // js.src = "//connect.facebook.net/en_US/all/debug.js";
-          ref.parentNode.insertBefore(js, ref);
-        }($document[0]));
 
-        $window.fbAsyncInit = function () {
+        asyncInit = function () {
           _paramsReady.promise.then(function() {
             // Run init function
             $injector.invoke(_initFunction, null, {'$fbInitParams': _initParams});
@@ -181,6 +183,24 @@
             _initReady.resolve();
           });
         };
+        
+        if (_loadSDK) {
+          // Load the SDK's source Asynchronously
+          (function(d){
+            var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+            if (d.getElementById(id)) {return;}
+            js = d.createElement('script'); js.id = id; js.async = true;
+            js.src = "//connect.facebook.net/" + _locale + "/all.js";
+            // js.src = "//connect.facebook.net/en_US/all/debug.js";
+            ref.parentNode.insertBefore(js, ref);
+          }($document[0]));
+
+          $window.fbAsyncInit = asyncInit;
+        }
+        else if ($window.FB) {
+          asyncInit();
+        }
+
 
         _$FB = {
           $$ready: false,
