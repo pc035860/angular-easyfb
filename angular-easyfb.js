@@ -55,12 +55,43 @@
       xfbml      : true  // parse XFBML tags on this page?
     };
     
-    // Default init function
-    var _defaultInitFunction = ['$window', '$fbInitParams', function ($window, $fbInitParams) {
-      // Initialize the FB JS SDK
-      $window.FB.init($fbInitParams);
-    }];
-    var _initFunction = _defaultInitFunction;
+    /**
+     * Default load SDK function
+     *
+     * Injectable local: 
+     *   $fbAsyncInit - module's private trigger of FB.init, should always be called to complete the $FB init process
+     *   $fbLocale    - configured SDK locale
+     */
+    var _defaultLoadSDKFunction = [
+                   '$window', '$document', '$fbAsyncInit', '$fbLocale',
+          function ($window,   $document,   $fbAsyncInit,   $fbLocale) {
+            // Load the SDK's source Asynchronously
+            (function(d){
+              var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+              if (d.getElementById(id)) {return;}
+              js = d.createElement('script'); js.id = id; js.async = true;
+              js.src = "//connect.facebook.net/" + $fbLocale + "/all.js";
+              // js.src = "//connect.facebook.net/" + $fbLocale + "/all/debug.js";  // debug
+              ref.parentNode.insertBefore(js, ref);
+            }($document[0]));
+
+            $window.fbAsyncInit = $fbAsyncInit;
+          }],
+        _loadSDKFunction = _defaultLoadSDKFunction;
+
+    /**
+     * Default init function
+     *
+     * Injectable locals: 
+     *   $fbInitParams - parameters provided by $FBProvider.setInitParams() or $FB.init()
+     */
+    var _defaultInitFunction = [
+                   '$window', '$fbInitParams', 
+          function ($window,   $fbInitParams) {
+            // Initialize the FB JS SDK
+            $window.FB.init($fbInitParams);
+          }],
+        _initFunction = _defaultInitFunction;
 
     /**
      * Generate namespace route in an object
@@ -127,6 +158,18 @@
         return _locale;
       },
       
+      setLoadSDKFunction: function (func) {
+        if (angular.isArray(func) || angular.isFunction(func)) {
+          _loadSDKFunction = func;
+        }
+        else {
+          throw new Error('Init function type error.');
+        }
+      },
+      getLoadSDKFunction: function () {
+        return _loadSDKFunction;
+      },
+
       setInitFunction: function (func) {
         if (angular.isArray(func) || angular.isFunction(func)) {
           _initFunction = func;
@@ -145,15 +188,18 @@
       $get: [
                '$window', '$q', '$document', '$parse', '$rootScope', '$injector',
       function ($window,   $q,   $document,   $parse,   $rootScope,   $injector) {
-        var _initReady, _$FB, 
-            _savedListeners = {};
+        var _initReady, _$FB, _savedListeners, _paramsReady, fbAsyncInit;
 
-        var _paramsReady = $q.defer();
+        _savedListeners = {};
+
+        _paramsReady = $q.defer();
 
         if (_initParams.appId || _initFunction !== _defaultInitFunction) {
           _paramsReady.resolve();
         }
 
+        _initReady = $q.defer();
+        
         /**
          * #fb-root check & create
          */
@@ -161,18 +207,8 @@
           $document.find('body').append('<div id="fb-root"></div>');
         }
 
-        _initReady = $q.defer();
-        // Load the SDK's source Asynchronously
-        (function(d){
-          var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
-          if (d.getElementById(id)) {return;}
-          js = d.createElement('script'); js.id = id; js.async = true;
-          js.src = "//connect.facebook.net/" + _locale + "/all.js";
-          // js.src = "//connect.facebook.net/en_US/all/debug.js";
-          ref.parentNode.insertBefore(js, ref);
-        }($document[0]));
-
-        $window.fbAsyncInit = function () {
+        // Run load SDK function
+        fbAsyncInit = function () {
           _paramsReady.promise.then(function() {
             // Run init function
             $injector.invoke(_initFunction, null, {'$fbInitParams': _initParams});
@@ -181,6 +217,10 @@
             _initReady.resolve();
           });
         };
+        $injector.invoke(_loadSDKFunction, null, {
+          '$fbAsyncInit': fbAsyncInit,
+          '$fbLocale': _locale
+        });
 
         _$FB = {
           $$ready: false,
@@ -201,109 +241,112 @@
           var getter = $parse(apiPath),
               setter = getter.assign;
           setter(_$FB, function () {
+            var apiCall = _proxy(function (args) {
+              var dfd, replaceCallbackAt;
 
-            var args = Array.prototype.slice.call(arguments),
-                apiCall = _proxy(function (args) {
-                  var dfd = $q.defer(),
-                      /**
-                       * Add or replce original callback function with deferred resolve
-                       * 
-                       * @param  {number} index expected api callback index
-                       */
-                      replaceCallbackAt = function (index) {
-                        var func = angular.isFunction(args[index]) ? args[index] : angular.noop,
-                            newFunc = function () {
-                              var funcArgs = Array.prototype.slice.call(arguments);
+              dfd = $q.defer();
 
-                              if ($rootScope.$$phase) {
-                                // already in angularjs context
-                                func.apply(null, funcArgs);
-                                dfd.resolve.apply(dfd, funcArgs);
-                              }
-                              else {
-                                // not in angularjs context
-                                $rootScope.$apply(function () {
-                                  func.apply(null, funcArgs);
-                                  dfd.resolve.apply(dfd, funcArgs);
-                                });
-                              }
-                            };
+              /**
+               * Add or replce original callback function with deferred resolve
+               * 
+               * @param  {number} index expected api callback index
+               */
+              replaceCallbackAt = function (index) {
+                var func, newFunc;
 
-                        while (args.length <= index) {
-                          args.push(null);
-                        }
+                func = angular.isFunction(args[index]) ? args[index] : angular.noop;
+                newFunc = function () {
+                  var funcArgs = Array.prototype.slice.call(arguments);
 
-                        /**
-                         * `FB.Event.unsubscribe` requires the original listener function.
-                         * Save the mapping of original->wrapped on `FB.Event.subscribe` for unsubscribing.
-                         */
-                        var eventName;
-                        if (apiPath === 'Event.subscribe') {
-                          eventName = args[0];
-                          if (angular.isUndefined(_savedListeners[eventName])) {
-                            _savedListeners[eventName] = [];
-                          }
-                          _savedListeners[eventName].push({
-                            original: func,
-                            wrapped: newFunc
-                          });
-                        }
-                        else if (apiPath === 'Event.unsubscribe') {
-                          eventName = args[0];
-                          if (angular.isArray(_savedListeners[eventName])) {
-                            var i, subscribed, l = _savedListeners[eventName].length;
-                            for (i = 0; i < l; i++) {
-                              subscribed = _savedListeners[eventName][i];
-                              if (subscribed.original === func) {
-                                newFunc = subscribed.wrapped;
-                                _savedListeners[eventName].splice(i, 1);
-                                break;
-                              }
-                            }
-                          }
-                        }
+                  if ($rootScope.$$phase) {
+                    // already in angularjs context
+                    func.apply(null, funcArgs);
+                    dfd.resolve.apply(dfd, funcArgs);
+                  }
+                  else {
+                    // not in angularjs context
+                    $rootScope.$apply(function () {
+                      func.apply(null, funcArgs);
+                      dfd.resolve.apply(dfd, funcArgs);
+                    });
+                  }
+                };
 
-                        // Replace the original one (or null) with newFunc
-                        args[index] = newFunc;
-                      };
+                while (args.length <= index) {
+                  args.push(null);
+                }
 
-                  if (cbArgIndex !== NO_CALLBACK) {
-                    if (angular.isNumber(cbArgIndex)) {
-                      /**
-                       * Constant callback argument index
-                       */
-                      replaceCallbackAt(cbArgIndex);
-                    }
-                    else if (angular.isArray(cbArgIndex)) {
-                      /**
-                       * Multiple possible callback argument index
-                       */
-                      var i, c;
-                      for (i = 0; i < cbArgIndex.length; i++) {
-                        c = cbArgIndex[i];
-
-                        if (args.length == c ||
-                            args.length == (c + 1) && angular.isFunction(args[c])) {
-
-                          replaceCallbackAt(c);
-
-                          break;
-                        }
+                /**
+                 * `FB.Event.unsubscribe` requires the original listener function.
+                 * Save the mapping of original->wrapped on `FB.Event.subscribe` for unsubscribing.
+                 */
+                var eventName;
+                if (apiPath === 'Event.subscribe') {
+                  eventName = args[0];
+                  if (angular.isUndefined(_savedListeners[eventName])) {
+                    _savedListeners[eventName] = [];
+                  }
+                  _savedListeners[eventName].push({
+                    original: func,
+                    wrapped: newFunc
+                  });
+                }
+                else if (apiPath === 'Event.unsubscribe') {
+                  eventName = args[0];
+                  if (angular.isArray(_savedListeners[eventName])) {
+                    var i, subscribed, l = _savedListeners[eventName].length;
+                    for (i = 0; i < l; i++) {
+                      subscribed = _savedListeners[eventName][i];
+                      if (subscribed.original === func) {
+                        newFunc = subscribed.wrapped;
+                        _savedListeners[eventName].splice(i, 1);
+                        break;
                       }
                     }
                   }
+                }
 
+                // Replace the original one (or null) with newFunc
+                args[index] = newFunc;
+              };
+
+              if (cbArgIndex !== NO_CALLBACK) {
+                if (angular.isNumber(cbArgIndex)) {
                   /**
-                   * Apply back to original FB SDK
+                   * Constant callback argument index
                    */
-                  var origFBFunc = getter($window.FB);
-                  if (!origFBFunc) {
-                    throw new Error("Facebook API `FB." + apiPath + "` doesn't exist.");
-                  }
-                  origFBFunc.apply($window.FB, args);
+                  replaceCallbackAt(cbArgIndex);
+                }
+                else if (angular.isArray(cbArgIndex)) {
+                  /**
+                   * Multiple possible callback argument index
+                   */
+                  var i, c;
+                  for (i = 0; i < cbArgIndex.length; i++) {
+                    c = cbArgIndex[i];
 
-                  return dfd.promise;
-                }, null, [args]);
+                    if (args.length == c ||
+                        args.length == (c + 1) && angular.isFunction(args[c])) {
+
+                      replaceCallbackAt(c);
+
+                      break;
+                    }
+                  }
+                }
+              }
+
+              /**
+               * Apply back to original FB SDK
+               */
+              var origFBFunc = getter($window.FB);
+              if (!origFBFunc) {
+                throw new Error("Facebook API `FB." + apiPath + "` doesn't exist.");
+              }
+              origFBFunc.apply($window.FB, args);
+
+              return dfd.promise;
+            }, null, [Array.prototype.slice.call(arguments)]);
 
             /**
              * Wrap the api function with our ready promise
@@ -447,6 +490,7 @@
             }
           });
 
+          // Wrap the social plugin code for FB.XFBML.parse
           $FB.XFBML.parse(_wrap(iElm)[0], onrenderHandler);
         }
       };
