@@ -44,6 +44,31 @@ module.exports = function(grunt) {
           keepalive: true
         }
       }
+    },
+    karma: {
+      unit: {
+        configFile: './test/karma-unit.conf.js',
+        autoWatch: false,
+        singleRun: true
+      },
+      unit_auto: {
+        configFile: './test/karma-unit.conf.js',
+        autoWatch: true,
+        singleRun: false
+      },
+      unit_coverage: {
+        configFile: './test/karma-unit.conf.js',
+        autoWatch: false,
+        singleRun: true,
+        reporters: ['progress', 'coverage'],
+        preprocessors: {
+          'app/scripts/*.js': ['coverage']
+        },
+        coverageReporter: {
+          type : 'html',
+          dir : 'coverage/'
+        }
+      }
     }
   });
 
@@ -51,6 +76,13 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-connect');
+  grunt.loadNpmTasks('grunt-karma');
+
+  grunt.registerTask('test', ['test:unit']);
+  grunt.registerTask('test:unit', ['karma:unit']);
+
+  grunt.registerTask('autotest', ['karma:unit_auto']);
+  grunt.registerTask('autotest:unit', ['karma:unit_auto']);
 
   grunt.registerTask('default', ['jshint:beforeuglify', 'uglify']);
 };
