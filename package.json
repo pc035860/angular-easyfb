@@ -35,6 +35,7 @@
     "karma": "^0.10.9",
     "karma-coverage": "^0.2.0",
     "grunt-karma": "^0.6.2",
-    "karma-ie-launcher": "^0.1.1"
+    "karma-ie-launcher": "^0.1.1",
+    "grunt-open": "^0.2.3"
   }
 }

@@ -43,6 +43,13 @@ module.exports = function(grunt) {
           base: '',
           keepalive: true
         }
+      },
+      coverage: {
+        options: {
+          port: 5555,
+          base: 'coverage/',
+          keepalive: true
+        }
       }
     },
     karma: {
@@ -62,12 +69,17 @@ module.exports = function(grunt) {
         singleRun: true,
         reporters: ['progress', 'coverage'],
         preprocessors: {
-          'app/scripts/*.js': ['coverage']
+          'angular-easyfb.js': ['coverage']
         },
         coverageReporter: {
           type : 'html',
           dir : 'coverage/'
         }
+      }
+    },
+    open: {
+      coverage: {
+        path: 'http://localhost:5555'
       }
     }
   });
@@ -77,12 +89,19 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-karma');
+  grunt.loadNpmTasks('grunt-open');
 
+  // single run tests
   grunt.registerTask('test', ['test:unit']);
   grunt.registerTask('test:unit', ['karma:unit']);
 
+  // autotest and watch tests
   grunt.registerTask('autotest', ['karma:unit_auto']);
   grunt.registerTask('autotest:unit', ['karma:unit_auto']);
+
+  //coverage testing
+  grunt.registerTask('test:coverage', ['karma:unit_coverage']);
+  grunt.registerTask('coverage', ['karma:unit_coverage','open:coverage','connect:coverage']);
 
   grunt.registerTask('default', ['jshint:beforeuglify', 'uglify']);
 };
