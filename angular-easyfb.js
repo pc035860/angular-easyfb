@@ -94,23 +94,6 @@
         _initFunction = _defaultInitFunction;
 
     /**
-     * Generate namespace route in an object
-     *
-     * @param  {object} obj   target object
-     * @param  {array}  paths ordered path asc
-     */
-    function _pathGen(obj, paths) {
-      if (paths.length === 0) {
-        return;
-      }
-      var path = paths.shift();
-      if (!obj[path]) {
-        obj[path] = {};
-      }
-      _pathGen(obj, paths);
-    }
-
-    /**
      * Getter/setter of a config
      *
      * @param  {object} target to be configured object
@@ -236,8 +219,6 @@
          * Publish FB APIs with auto-check ready state
          */
         angular.forEach(_publishedApis, function (cbArgIndex, apiPath) {
-          _pathGen(_$FB, apiPath.split(/\./));
-
           var getter = $parse(apiPath),
               setter = getter.assign;
           setter(_$FB, function () {
