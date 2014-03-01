@@ -2,7 +2,7 @@
 
 describe('$FB', function () {
 
-  var MODULE = 'ezfb',
+  var MODULE_NAME = 'ezfb',
       APP_ID = 'some fb app id',
       DELAY = 999999999999,
       DEFAULT_INIT_PARAMS = {
@@ -11,7 +11,9 @@ describe('$FB', function () {
         xfbml      : true
       };
 
-  beforeEach(module(MODULE));
+  var jqLite = angular.element;
+
+  beforeEach(module(MODULE_NAME));
 
   describe('configuration and initialization', function () {
     
@@ -135,7 +137,16 @@ describe('$FB', function () {
 
     var fbMockCallSpy, fbMockCallbackSpy, fbMockPromiseSpy;
 
+    /**
+     * Decorate $window for mocking FB JS SDK, with given api path and method.
+     * May accept string/array as api path. Also support object input.
+     * 
+     * @param  {mixed}    apiPath path to the api call
+     * @param  {function} value   must be a function if presented
+     */
     var mockSDKApi = function (apiPath, value) {
+      var __toString = Object.prototype.toString;
+
       module(function ($provide) {
         var pathAssign = function (obj, pathStr, value) {
           var paths = pathStr.split(/\./);
@@ -166,9 +177,18 @@ describe('$FB', function () {
           // Still required to provide an `init` function
           init: angular.noop
         };
-        angular.forEach(apiPath, function (p) {
-          pathAssign(mockFB, p, value);
-        });
+        if (__toString.call(apiPath) === '[object Object]' && !value) {
+          // map mode
+          angular.forEach(apiPath, function (v, p) {
+            pathAssign(mockFB, p, v);
+          });
+        }
+        else {
+          // array mode
+          angular.forEach(apiPath, function (p) {
+            pathAssign(mockFB, p, value);
+          });
+        }
 
         $provide.decorator('$window', function ($delegate) {
           $delegate.FB = mockFB;
@@ -565,7 +585,7 @@ describe('$FB', function () {
           appId: APP_ID
         });
 
-        elm = angular.element('<div>')[0];
+        elm = jqLite('<div>')[0];
       });
 
       it('should call FB.XFBML.parse', function () {
@@ -606,6 +626,217 @@ describe('$FB', function () {
         expect(fbMockPromiseSpy.mostRecentCall.args[0]).toEqual(API_RESPONSE);
       });
     });
+
+    var pubsub = (function () {
+      var _core = jqLite('<span>');
+
+      return {
+        pub: function (name) {
+          _core.triggerHandler(name);
+        },
+        sub: function (name, handler) {
+          _core.on(name, handler);
+        },
+        unsub: function (name, handler) {
+          if (!handler || typeof handler !== 'function') {
+            return;
+          }
+          _core.off(name, handler);
+        },
+        clear: function () {
+          _core.off();
+        }
+      };
+    }());
+
+    describe('pubsub service with jqLite', function () {
+      var EVENT_NAME = 'sweetjs';
+
+      var handlerSpy;
+
+      beforeEach(function () {
+        handlerSpy = jasmine.createSpy('pubsub sub handler');
+      });
+
+      afterEach(function () {
+        pubsub.clear();
+      });
+
+      it('should trigger handler', function () {
+        pubsub.sub(EVENT_NAME, handlerSpy);
+        pubsub.pub(EVENT_NAME);
+
+        expect(handlerSpy.callCount).toEqual(1);
+      });
+
+      it('should not trigger handler if sub after pub', function () {
+        pubsub.pub(EVENT_NAME);
+        pubsub.sub(EVENT_NAME, handlerSpy);
+
+        expect(handlerSpy.callCount).toEqual(0);
+      });
+
+      it('should not trigger handler after unsub', function () {
+        pubsub.sub(EVENT_NAME, handlerSpy);
+        pubsub.unsub(EVENT_NAME, handlerSpy);
+        pubsub.pub(EVENT_NAME);
+
+        expect(handlerSpy.callCount).toEqual(0);
+      });
+
+      it('should trigger handler if unsub with a different handler', function () {
+        pubsub.sub(EVENT_NAME, handlerSpy);
+        pubsub.unsub(EVENT_NAME, angular.noop);
+        pubsub.pub(EVENT_NAME);
+
+        expect(handlerSpy.callCount).toEqual(1);
+      });
+
+      it('should trigger handler if unsub without specifying handler', function () {
+        pubsub.sub(EVENT_NAME, handlerSpy);
+        pubsub.unsub(EVENT_NAME);
+        pubsub.pub(EVENT_NAME);
+
+        expect(handlerSpy.callCount).toEqual(1);
+      });
+
+      it('should not trigger handler after clear', function () {
+        pubsub.sub(EVENT_NAME, handlerSpy);
+        pubsub.clear();
+        pubsub.pub(EVENT_NAME);
+
+        expect(handlerSpy.callCount).toEqual(0);
+      });
+    });
+
+    describe('.Event', function () {
+      /**
+       * Ref:
+       *   https://developers.facebook.com/docs/reference/javascript/FB.Event.subscribe
+       *   https://developers.facebook.com/docs/reference/javascript/FB.Event.unsubscribe
+       */
+
+      var EVENT_NAME = 'edge.create';
+      
+      var $FB, $rootScope;
+
+      var subSpy, subHandlerSpy, unsubSpy, subPromiseSpy;
+
+      beforeEach(function () {
+        subSpy = jasmine.createSpy('.Event.subscribe call');
+        subHandlerSpy = jasmine.createSpy('.Event.subscribe handler call');
+        subPromiseSpy = jasmine.createSpy('.Event.subscribe promise call');
+        unsubSpy = jasmine.createSpy('.Event.unsubscribe call');
+
+        mockSDKApi({
+          'Event.subscribe': function (name, handler) {
+            pubsub.sub(name, handler);
+            subSpy(name, handler);
+          },
+          'Event.unsubscribe': function (name, handler) {
+            pubsub.unsub(name, handler);
+            unsubSpy(name, handler);
+          }
+        });
+
+        inject(function (_$FB_, _$rootScope_) {
+          $FB = _$FB_;
+          $rootScope = _$rootScope_;
+        });
+
+        $FB.init({
+          appId: APP_ID
+        });
+      });
+
+      afterEach(function () {
+        pubsub.clear();
+      });
+
+      describe('.subscribe', function () {
+        it('should call FB.Event.subscribe', function () {
+          $FB.Event.subscribe(EVENT_NAME);
+          $rootScope.$apply();
+
+          expect(subSpy.callCount).toEqual(1);
+        });
+
+        it('should trigger handler on event takes place', function () {
+          $FB.Event.subscribe(EVENT_NAME, subHandlerSpy);
+          $rootScope.$apply();
+
+          pubsub.pub(EVENT_NAME);
+          expect(subHandlerSpy.callCount).toEqual(1);
+        });
+
+        it('should trigger promise on event takes place', function () {
+          $FB.Event.subscribe(EVENT_NAME).then(subPromiseSpy);
+          $rootScope.$apply();
+
+          pubsub.pub(EVENT_NAME);
+          expect(subPromiseSpy.callCount).toEqual(1);
+        });
+
+        it('should trigger both handler and promise on event takes place', function () {
+          $FB.Event.subscribe(EVENT_NAME, subHandlerSpy).then(subPromiseSpy);
+          $rootScope.$apply();
+
+          pubsub.pub(EVENT_NAME);
+          expect(subHandlerSpy.callCount).toEqual(1);
+          expect(subPromiseSpy.callCount).toEqual(1);
+        });
+
+        it('should only trigger corresponding handler on event takes place', function () {
+          var aHandler = jasmine.createSpy('a'),
+              bHandler = jasmine.createSpy('b');
+
+          $FB.Event.subscribe('a', aHandler);
+          $FB.Event.subscribe('b', bHandler);
+          $rootScope.$apply();
+
+          pubsub.pub('a');
+          expect(aHandler.callCount).toEqual(1);
+          expect(bHandler.callCount).toEqual(0);
+
+          pubsub.pub('b');
+          expect(aHandler.callCount).toEqual(1);
+          expect(bHandler.callCount).toEqual(1);
+        });
+      });
+
+      describe('.unsubscribe', function () {
+        it('should call FB.Event.unsubscribe', function () {
+          $FB.Event.unsubscribe(EVENT_NAME);
+          $rootScope.$apply();
+
+          expect(unsubSpy.callCount).toEqual(1);
+        });
+
+        it('should trigger both handler and promise on event takes place if called without specifying handler or a different handler', function () {
+          $FB.Event.subscribe(EVENT_NAME, subHandlerSpy).then(subPromiseSpy);
+          $FB.Event.unsubscribe(EVENT_NAME);
+          $FB.Event.unsubscribe(EVENT_NAME, angular.noop);
+          $rootScope.$apply();
+
+          pubsub.pub(EVENT_NAME);
+          expect(subHandlerSpy.callCount).toEqual(1);
+          expect(subPromiseSpy.callCount).toEqual(1);
+        });
+
+        it('should not trigger either handler or promise after being called correctly', function () {
+          $FB.Event.subscribe(EVENT_NAME, subHandlerSpy).then(subPromiseSpy);
+          $FB.Event.unsubscribe(EVENT_NAME, subHandlerSpy);
+          $rootScope.$apply();
+
+          pubsub.pub(EVENT_NAME);
+          expect(subHandlerSpy.callCount).toEqual(0);
+          expect(subPromiseSpy.callCount).toEqual(0);
+        });
+      });
+
+    });
+
+    // TODO: Canvas.* APIs
   });
 
 });
