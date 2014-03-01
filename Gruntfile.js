@@ -103,6 +103,6 @@ module.exports = function(grunt) {
   grunt.registerTask('test:coverage', ['karma:unit_coverage']);
   grunt.registerTask('coverage', ['karma:unit_coverage','open:coverage','connect:coverage']);
 
-  grunt.registerTask('default', ['jshint:beforeuglify', 'uglify']);
+  grunt.registerTask('default', ['jshint:beforeuglify', 'test', 'uglify']);
 };
 
