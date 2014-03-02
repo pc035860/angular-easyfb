@@ -134,8 +134,13 @@ describe('social plugin directive', function () {
 
     function toCamelCase(dirTag) {
       var l = [];
-      angular.forEach(dirTag.split(/-|:/), function (token) {
-        l.push(token.charAt(0).toUpperCase() + token.slice(1));
+      angular.forEach(dirTag.split(/-|:/), function (token, i) {
+        if (i === 0) {
+          l.push(token);
+        }
+        else {
+          l.push(token.charAt(0).toUpperCase() + token.slice(1));
+        }
       });
       return l.join('');
     }
