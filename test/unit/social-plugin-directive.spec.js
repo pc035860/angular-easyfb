@@ -72,36 +72,52 @@ describe('social plugin directive', function () {
     element.children().children().remove();
   }
 
-  describe('<fb:like>', function () {
-    beforeEach(function () {
-      compileDir('<fb:like onrender="rendered()"></fb:like>');
+  function getTemplate(dirTag) {
+    return '<'+ dirTag +' onrender="rendered()"></'+ dirTag +'>';
+  }
+
+  var WRAPPER_TAG_NAME = 'SPAN';
+
+  angular.forEach([
+    'fb:like', 'fb:share-button', 'fb:send', 'fb:post',
+    'fb:follow', 'fb:comments', 'fb:activity', 'fb:recommendations',
+    'fb:recommendations-bar', 'fb:like-box', 'fb:facepile'
+  ], function (dirTag) {
+    var dirClass = dirTag.replace(':', '-');
+
+    describe('<'+ dirTag + '>', function () {
+      beforeEach(function () {
+        compileDir(getTemplate(dirTag));
+      });
+
+      it('should have called $FB.XFBML.parse', function () {
+        expect(xfbmlParseSpy.callCount).toEqual(1);
+      });
+
+      it('should have called $FB.XFBML.parse with wapper element', function () {
+        expect(xfbmlParseSpy.mostRecentCall.args[0]).toEqual(element.children()[0]);
+      });
+
+      it('should evaluate onrender expression after rendered', function () {
+        expect(onrenderSpy.callCount).toEqual(0);
+        makeItRendered();
+        expect(onrenderSpy.callCount).toEqual(1);
+      });
+
+      it('should be unwrapped after rendered', function () {
+        expect(element.children()[0].tagName).toEqual(WRAPPER_TAG_NAME);
+        makeItRendered();
+        expect(element.children()[0].tagName).toEqual(dirTag.toUpperCase());
+      });
+      
+      it("should be unwrapped on $destroy even hasn't been rendered", function () {
+        expect(element.children()[0].tagName).toEqual(WRAPPER_TAG_NAME);
+        destroyDirectiveElement();
+        expect(element.children().length).toEqual(0);
+      });
     });
 
-    it('should have called $FB.XFBML.parse', function () {
-      expect(xfbmlParseSpy.callCount).toEqual(1);
-    });
-
-    it('should have called $FB.XFBML.parse with wapper element', function () {
-      expect(xfbmlParseSpy.mostRecentCall.args[0]).toEqual(element.children()[0]);
-    });
-
-    it('should evaluate onrender expression after rendered', function () {
-      expect(onrenderSpy.callCount).toEqual(0);
-      makeItRendered();
-      expect(onrenderSpy.callCount).toEqual(1);
-    });
-
-    it('should be unwrapped after rendered', function () {
-      expect(element.children()[0].tagName).toEqual('SPAN');
-      makeItRendered();
-      expect(element.children()[0].tagName).toEqual('FB:LIKE');
-    });
-    
-    it("should be unwrapped on $destroy even hasn't been rendered", function () {
-      expect(element.children()[0].tagName).toEqual('SPAN');
-      destroyDirectiveElement();
-      expect(element.children().length).toEqual(0);
-    });
   });
+
 
 });
