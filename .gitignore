@@ -3,3 +3,5 @@ node_modules
 *.sublime-*
 .tern-port
 .DS_Store
+bower_components
+coverage

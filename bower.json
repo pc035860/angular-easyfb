@@ -1,6 +1,6 @@
 {
   "name": "angular-easyfb",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Super easy AngularJS + Facebook JavaScript SDK.",
   "main": "angular-easyfb.js",
   "ignore": [
@@ -13,5 +13,8 @@
     "tests"
   ],
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "angular": "~1.2.13",
+    "angular-mocks": "~1.2.13"
+  }
 }
