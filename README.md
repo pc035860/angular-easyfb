@@ -7,8 +7,9 @@ AngularJS + Facebook JavaScript SDK.
 * Full [Facebook JavaScript SDK](https://developers.facebook.com/docs/reference/javascript/) support
 * Seemless FB SDK initialization(asynchronouslly load script and FB.init)
 * All SDK API callbacks are automatically applied with AngularJS context
-* Bundled a handy directive for parsing Facebook XFBML plugins dynamically
+* Bundled a handy directive for parsing Facebook XFBML plugins dynamically (deprecated since v0.3.0)
 * Support both callback and $q promise
+* Provide built-in directive support for Facebook XFBML plugins (v0.3.0)
 
 #### Demos
 
@@ -20,7 +21,7 @@ AngularJS + Facebook JavaScript SDK.
 
 Include the angular-easyfb module with AngularJS script in your page.
 ```html
-<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular.min.js"></script>
 <script src="http://pc035860.github.io/angular-easyfb/angular-easyfb.min.js"></script>
 ```
 
@@ -99,9 +100,48 @@ angular.module('myApp')
 });
 ```
 
+###### `getLoadSDKFunction / setLoadSDKFunction`
+
+Customize Facebook JS SDK loading. The function also supports DI, with two more local injections:
+
+- `$fbLocale` - locale name
+- `$fbAsyncInit` - must called to finish the module initialization process
+
+```js
+// Defaul load SDK function
+var _defaultLoadSDKFunction = [
+         '$window', '$document', '$fbAsyncInit', '$fbLocale',
+function ($window,   $document,   $fbAsyncInit,   $fbLocale) {
+  // Load the SDK's source Asynchronously
+  (function(d){
+    var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+    if (d.getElementById(id)) {return;}
+    js = d.createElement('script'); js.id = id; js.async = true;
+    js.src = "//connect.facebook.net/" + $fbLocale + "/all.js";
+    // js.src = "//connect.facebook.net/" + $fbLocale + "/all/debug.js";  // debug
+    ref.parentNode.insertBefore(js, ref);
+  }($document[0]));
+
+  $window.fbAsyncInit = $fbAsyncInit;
+}];
+```
+
+Customization example:
+```js
+angular.module('myApp')
+
+.config(function ($FBProvider) {
+  // Feasible config if the FB JS SDK script is already loaded
+  $FBProvider.setLoadSDKFunction(function ($fbAsyncInit) {
+    $fbAsyncInit();
+  });
+});
+```
+
+
 #### $FB.init
 
-In the case that you don't want to(or you can't) configure your `FB.init` parameters in configuration block, you may use `$FB.init` in run block. And any `$FB` API call will not run until `$FB.init` is called.
+In the case that you don't want to(or you can't) configure your `FB.init` parameters in configuration phase, you may use `$FB.init` in run phase. And any `$FB` API call will not run until `$FB.init` is called.
 
 ```js
 angular.module('myApp')
@@ -171,31 +211,28 @@ $q.all([
 });
 ```
 
-##### Convenient view integration (deprecated in AngularJS 1.2.0-rc3)
+Watch the [promise version api demo](http://plnkr.co/edit/UMUtFc?p=preview) to see it in action.
 
-```js
-/**
- * In controller
- */
-$scope.me = $FB.getLoginStatus()
-  .then(function () { 
-    return $FB.api('/me');
-  });
-```
+
+### Social plugins support (v0.3.0)
+
+[Facebook Social Plugins](https://developers.facebook.com/docs/plugins/) are now supported with built-in directives.
+
+The code copied from the above link will automatically work in `angular-easyfb`-covered AngularJS apps.
+
+Additionally, you can add an `onrender` parameter to the social plugin directive. Expressions in the `onrender` parameter will be evaluated every time the social plugin gets rendered.
 
 ```html
-<!-- In view template -->
-<p>{{ me.name }}</p>
+<div class="fb-like" onrender="fbLikeRendered()"
+  data-href="https://developers.facebook.com/docs/plugins/" 
+  data-layout="standard" 
+  data-action="like" 
+  data-show-faces="true" 
+  data-share="true"></div>
 ```
 
-Output:
-```html
-<p>Robin Fan</p>
-```
 
-Watch the [promise version api demo](http://plnkr.co/edit/UMUtFc?p=preview) to see them in action.
-
-### `ezfb-xfbml` directive
+### `ezfb-xfbml` directive (deprecated since v0.3.0)
 
 ```
 <ANY ezfb-xfbml[="{expression}"]
@@ -235,7 +272,7 @@ Moreover, it'll try to reset `ezfb-xfbml` value to `false` after reload triggere
 
 #### `onrender` parameter
 
-`onrender` expression will be evaluated every time the `ezfb-xfbml` target gets rendered(via FB event `xfbml.render`).
+`onrender` expression will be evaluated every time the `ezfb-xfbml` target gets rendered.
 
 ```html
 <div class="tab" 
@@ -256,7 +293,39 @@ Watch the [demo](http://plnkr.co/edit/eak9VY?p=preview) to see them in action.
 
 See the changelog [here](https://github.com/pc035860/angular-easyfb/blob/master/CHANGELOG.md).
 
-## Todo
 
-* Test
-* Better documentation?
+## Develop
+
+`angular-easyfb` uses [Grunt](http://gruntjs.com/) to run all the development tasks.
+
+If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins.
+
+`angular-easyfb` also uses [Bower](http://bower.io/) to manage packages for tests.
+
+### Setup
+
+After cloning the git repo to your place, simply run following commands to install required packages.
+```sh
+npm install
+bower install
+```
+
+### Build
+
+Generate a minified js file after running all the tests.
+
+```sh
+grunt
+```
+
+### Running tests
+
+Unit tests:
+```sh
+grunt test:unit
+```
+
+Test coverage:
+```sh
+grunt converage
+```
