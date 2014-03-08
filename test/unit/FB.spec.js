@@ -13,6 +13,14 @@ describe('$FB', function () {
 
   var jqLite = angular.element;
 
+  beforeEach(function(){
+    this.addMatchers({
+      toEqualData: function(expected) {
+        return angular.equals(this.actual, expected);
+      }
+    });
+  });
+
   beforeEach(module(MODULE_NAME));
 
   describe('configuration phase ($FBProvider)', function () {
@@ -98,7 +106,7 @@ describe('$FB', function () {
         var expectedParams = angular.extend({}, DEFAULT_INIT_PARAMS, {appId: APP_ID});
 
         expect(initSpy.callCount).toEqual(1);
-        expect(initSpy.mostRecentCall.args[0]).toEqual(expectedParams);
+        expect(initSpy.mostRecentCall.args[0]).toEqualData(expectedParams);
       });
 
       it('should have FB.init called even SDK is loaded asynchronously', function () {
@@ -179,7 +187,7 @@ describe('$FB', function () {
         $rootScope.$apply();
 
         var expectedParams = angular.extend({}, DEFAULT_INIT_PARAMS, {appId: APP_ID});
-        expect(customInitSpy.mostRecentCall.args[0]).toEqual(expectedParams);
+        expect(customInitSpy.mostRecentCall.args[0]).toEqualData(expectedParams);
       });
     });
 
@@ -522,7 +530,7 @@ describe('$FB', function () {
           $rootScope.$apply();
 
           expect(fbMockCallbackSpy.callCount).toEqual(1);
-          expect(fbMockCallbackSpy.mostRecentCall.args[0]).toEqual({
+          expect(fbMockCallbackSpy.mostRecentCall.args[0]).toEqualData({
             res: apiName
           });
         });
@@ -532,7 +540,7 @@ describe('$FB', function () {
           $rootScope.$apply();
 
           expect(fbMockPromiseSpy.callCount).toEqual(1);
-          expect(fbMockPromiseSpy.mostRecentCall.args[0]).toEqual({
+          expect(fbMockPromiseSpy.mostRecentCall.args[0]).toEqualData({
             res: apiName
           });
         });
@@ -542,11 +550,11 @@ describe('$FB', function () {
           $rootScope.$apply();
 
           expect(fbMockCallbackSpy.callCount).toEqual(1);
-          expect(fbMockCallbackSpy.mostRecentCall.args[0]).toEqual({
+          expect(fbMockCallbackSpy.mostRecentCall.args[0]).toEqualData({
             res: apiName
           });
           expect(fbMockPromiseSpy.callCount).toEqual(1);
-          expect(fbMockPromiseSpy.mostRecentCall.args[0]).toEqual({
+          expect(fbMockPromiseSpy.mostRecentCall.args[0]).toEqualData({
             res: apiName
           });
         });
