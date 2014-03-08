@@ -16,6 +16,7 @@ AngularJS + Facebook JavaScript SDK.
 * [API demo](http://plnkr.co/edit/qclqht?p=preview)
 * [XFBML demo](http://plnkr.co/edit/eak9VY?p=preview)
 * [API demo (promise version)](http://plnkr.co/edit/UMUtFc?p=preview)
+* [Built-in social plugin directives demo](http://plnkr.co/edit/1c5cWB?p=preview)
 
 ## Getting started
 
@@ -230,6 +231,8 @@ Additionally, you can add an `onrender` parameter to the social plugin directive
   data-show-faces="true" 
   data-share="true"></div>
 ```
+
+Demo: http://plnkr.co/edit/1c5cWB?p=preview
 
 
 ### `ezfb-xfbml` directive (deprecated since v0.3.0)
