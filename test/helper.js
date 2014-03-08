@@ -1,4 +1,14 @@
 /**
+ * FB SDK Loading function for testing
+ * We don't load real FB JS SDK in. We mock it with `mockSDKApi`
+ * 
+ * @param  {function} $fbAsyncInit module initialization function
+ */
+function mockSDKLoader($fbAsyncInit) {
+  $fbAsyncInit();
+}
+
+/**
  * Decorate $window for mocking FB JS SDK, with given api path and method.
  * May accept string/array as api path. Also support object input.
  * 

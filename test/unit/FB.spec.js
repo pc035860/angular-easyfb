@@ -15,9 +15,11 @@ describe('$FB', function () {
 
   beforeEach(module(MODULE_NAME));
 
-  describe('configuration and initialization', function () {
+  describe('configuration phase ($FBProvider)', function () {
     
     var loadSDKSpy, initSpy;
+
+    var $rootScope;
 
     beforeEach(function () {
       loadSDKSpy = jasmine.createSpy('load sdk');
@@ -33,97 +35,151 @@ describe('$FB', function () {
       });
     });
 
-
-    it('should try to load FB JS SDK once', function () {
-      module(function ($FBProvider) {
-        $FBProvider.setLoadSDKFunction(loadSDKSpy);
-        $FBProvider.setInitParams({
-          appId: APP_ID
-        });
+    function inject$FB () {
+      inject(function ($FB, _$rootScope_) {
+        $rootScope = _$rootScope_;
       });
-      inject(function ($FB) {
+    }
+
+    describe('.setLoadSDKFunction', function () {
+      
+      it('should be called on $FB injection', function () {
+        module(function ($FBProvider) {
+          $FBProvider.setLoadSDKFunction(['$fbAsyncInit', '$fbLocale', loadSDKSpy]);
+        });
+        inject$FB();
+
         expect(loadSDKSpy.callCount).toEqual(1);
       });
 
+      it('should be able to be called with DI locals: $fbAsyncInit, $fbLocale', function () {
+        module(function ($FBProvider) {
+          $FBProvider.setLoadSDKFunction(['$fbAsyncInit', '$fbLocale', loadSDKSpy]);
+        });
+        inject$FB();
+
+        // $fbAsyncInit
+        expect(typeof loadSDKSpy.mostRecentCall.args[0] === 'function').toBeTruthy();
+        // $fbLocale
+        expect(typeof loadSDKSpy.mostRecentCall.args[1] === 'string').toBeTruthy();
+      });
     });
 
-    it('should load FB JS SDK with correct locale', function () {
-      var LOCALE = 'zhTW';
+    describe('.setInitParams', function () {
 
-      module(function ($FBProvider) {
-        $FBProvider.setLoadSDKFunction(['$fbLocale', function ($fbLocale) {
+      beforeEach(module(function ($FBProvider) {
+        $FBProvider.setLoadSDKFunction(function ($fbAsyncInit) {
+          mockSDKLoader($fbAsyncInit);
+          loadSDKSpy($fbAsyncInit);
+        });
+      }));
+
+      it('should cause SDK to be loaded', function () {
+        module(function ($FBProvider) {
+          $FBProvider.setInitParams({
+            appId: APP_ID
+          });
+        });
+        inject$FB();
+
+        expect(loadSDKSpy.callCount).toEqual(1);
+        expect(typeof loadSDKSpy.mostRecentCall.args[0] === 'function').toBeTruthy();
+      });
+
+      it('should have FB.init called with correct parameters', function () {
+        module(function ($FBProvider) {
+          $FBProvider.setInitParams({
+            appId: APP_ID
+          });
+        });
+        inject$FB();
+        $rootScope.$apply();
+
+        var expectedParams = angular.extend({}, DEFAULT_INIT_PARAMS, {appId: APP_ID});
+
+        expect(initSpy.callCount).toEqual(1);
+        expect(initSpy.mostRecentCall.args[0]).toEqual(expectedParams);
+      });
+
+      it('should have FB.init called even SDK is loaded asynchronously', function () {
+        module(function ($FBProvider) {
+          $FBProvider.setLoadSDKFunction([
+                   '$fbAsyncInit', '$timeout', 
+          function ($fbAsyncInit,   $timeout) {
+            // Delay a bit
+            $timeout(function () {
+              $fbAsyncInit();
+            }, DELAY);
+          }]);
+          
+          $FBProvider.setInitParams({
+            appId: APP_ID
+          });
+        });
+        inject(function ($FB, $rootScope, $timeout) {
+          $rootScope.$apply();
+          $timeout.flush();
+
+          expect(initSpy.callCount).toEqual(1);
+        });
+      });
+    });
+
+    describe('.setLocale', function () {
+      beforeEach(module(function ($FBProvider) {
+        $FBProvider.setLoadSDKFunction(function ($fbLocale) {
           loadSDKSpy($fbLocale);
-        }]);
-        $FBProvider.setLocale(LOCALE);
+        });
         $FBProvider.setInitParams({
           appId: APP_ID
         });
-      });
-      inject(function ($FB) {
-        expect(loadSDKSpy.callCount).toEqual(1);
+      }));
+
+      it('should cause SDK to be loaded with given locale', function () {
+        var LOCALE = 'zhTW';
+
+        module(function ($FBProvider) {
+          $FBProvider.setLocale(LOCALE);
+        });
+        inject$FB();
+
         expect(loadSDKSpy.mostRecentCall.args[0]).toEqual(LOCALE);
       });
-
     });
 
-    it('should call init function with correct appId', function () {
-      module(function ($FBProvider) {
-        $FBProvider.setLoadSDKFunction(['$fbAsyncInit', function ($fbAsyncInit) {
-          // Can't rely on default load SDK function here
-          $fbAsyncInit();
-        }]);
+    describe('.setInitFunction', function () {
+      var customInitSpy;
+
+      beforeEach(module(function ($FBProvider) {
+        $FBProvider.setLoadSDKFunction(mockSDKLoader);
         $FBProvider.setInitParams({
           appId: APP_ID
         });
-      });
-      inject(function ($FB, $rootScope) {
-        $rootScope.$apply();
+      }));
 
-        expect(initSpy.callCount).toEqual(1);
-        expect(initSpy.mostRecentCall.args[0]).toEqual(
-          angular.extend(DEFAULT_INIT_PARAMS, {
-            appId: APP_ID
-          })
-        );
+      beforeEach(function () {
+        customInitSpy = jasmine.createSpy('custom init function');
       });
-    });
 
-    it('should call init function even sdk is loaded asynchronously', function () {
-      module(function ($FBProvider) {
-        $FBProvider.setLoadSDKFunction([
-                 '$fbAsyncInit', '$timeout', 
-        function ($fbAsyncInit,   $timeout) {
-          // Delay a bit
-          $timeout(function () {
-            $fbAsyncInit();
-          }, DELAY);
-        }]);
-        $FBProvider.setInitParams({
-          appId: APP_ID
+      it('should call custom init function on init', function () {
+        module(function ($FBProvider) {
+          $FBProvider.setInitFunction(customInitSpy);
         });
-      });
-      inject(function ($FB, $rootScope, $timeout) {
+        inject$FB();
         $rootScope.$apply();
-        $timeout.flush();
 
-        expect(initSpy.callCount).toEqual(1);
+        expect(customInitSpy.callCount).toEqual(1);
       });
-    });
 
-    it('should call init function when setting up parameters in the run phase', function () {
-      module(function ($FBProvider) {
-        $FBProvider.setLoadSDKFunction(['$fbAsyncInit', function ($fbAsyncInit) {
-          // Can't rely on default load SDK function here
-          $fbAsyncInit();
-        }]);
-      });
-      inject(function ($FB, $rootScope) {
-        $FB.init({
-          appId: APP_ID
+      it('should be able to be called with DI local: $fbInitParams', function () {
+        module(function ($FBProvider) {
+          $FBProvider.setInitFunction(['$fbInitParams', customInitSpy]);
         });
+        inject$FB();
         $rootScope.$apply();
 
-        expect(initSpy).toHaveBeenCalled();
+        var expectedParams = angular.extend({}, DEFAULT_INIT_PARAMS, {appId: APP_ID});
+        expect(customInitSpy.mostRecentCall.args[0]).toEqual(expectedParams);
       });
     });
 
@@ -143,10 +199,7 @@ describe('$FB', function () {
       fbMockPromiseSpy = jasmine.createSpy('fb api promise');
 
       module(function ($FBProvider) {
-        $FBProvider.setLoadSDKFunction(['$fbAsyncInit', function ($fbAsyncInit) {
-          // Can't rely on default load SDK function here
-          $fbAsyncInit();
-        }]);
+        $FBProvider.setLoadSDKFunction(mockSDKLoader);
       });
     });
 
