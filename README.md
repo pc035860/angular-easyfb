@@ -223,6 +223,8 @@ The code copied from the above link will automatically work in `angular-easyfb`-
 
 Additionally, you can add an `onrender` parameter to the social plugin directive. Expressions in the `onrender` parameter will be evaluated every time the social plugin gets rendered.
 
+##### Currently these directives don't fully support interpolated parameters, a work-around can be found [here](https://github.com/pc035860/angular-easyfb/issues/13#issuecomment-37129981). Just make sure you have all the interpolated scope variables specified in the `ng-if`.
+
 ```html
 <div class="fb-like" onrender="fbLikeRendered()"
   data-href="https://developers.facebook.com/docs/plugins/" 
