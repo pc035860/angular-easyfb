@@ -417,7 +417,56 @@
     };
   }]);
 
-  var creatSocialPluginDirective = function (dirName) {
+
+  // ref: https://developers.facebook.com/docs/plugins
+  var _socialPluginDirectiveConfig = {
+    'fbLike': [
+      'action', 'colorscheme', 'href', 'kidDirectedSite',
+      'layout', 'ref', 'share', 'showFaces', 'width'
+    ],
+    'fbShareButton': [
+      'href', 'layout', 'width'
+    ],
+    'fbSend': [
+      'colorscheme', 'href', 'kidDirectedSite', 'ref'
+    ],
+    'fbPost': [
+      'href', 'width'
+    ],
+    'fbFollow': [
+      'colorscheme', 'href', 'kidDirectedSite', 'layout',
+      'showFaces', 'width'
+    ],
+    'fbComments': [
+      'colorscheme', 'href', 'mobile', 'numPosts',
+      'orderBy', 'width'
+    ],
+    'fbActivity': [
+      'action', 'appId', 'colorscheme', 'filter', 'header',
+      'height', 'linktarget', 'maxAge', 'recommendations',
+      'ref', 'site', 'width'
+    ],
+    'fbRecommendations': [
+      'action', 'appId', 'colorscheme', 'header', 'height',
+      'linktarget', 'maxAge', 'ref', 'site', 'width'
+    ],
+    'fbRecommendationsBar': [
+      'action', 'href', 'maxAge', 'numRecommendations',
+      'readTime', 'ref', 'side', 'site', 'trigger'
+    ],
+    'fbLikeBox': [
+      'colorscheme', 'forceWall', 'header', 'height',
+      'href', 'showBorder', 'showFaces', 'stream', 'width'
+    ],
+    'fbFacepile': [
+      'action', 'appId', 'colorscheme', 'href', 'maxRows',
+      'size', 'width'
+    ]
+  };
+
+  angular.forEach(_socialPluginDirectiveConfig, creatSocialPluginDirective);
+
+  function creatSocialPluginDirective(availableAttrs, dirName) {
     var CLASS_WRAP_SPAN = 'ezfb-social-plugin-wrap',
         STYLE_WRAP_SPAN = 'display: inline-block; width: 0; height: 0; overflow: hidden;';
     
@@ -438,8 +487,8 @@
         };
     
     module.directive(dirName, [
-             '$FB',
-    function ($FB) {
+             '$FB', '$log',
+    function ($FB,   $log) {
       return {
         restrict: 'EC',
         require: '?^ezfbXfbml',
@@ -471,18 +520,19 @@
             }
           });
 
-          // Wrap the social plugin code for FB.XFBML.parse
-          $FB.XFBML.parse(_wrap(iElm)[0], onrenderHandler);
+          scope.$watch(function () {
+            var watchList = [];
+            angular.forEach(availableAttrs, function (attrName) {
+              watchList.push(iAttrs[attrName]);
+            });
+            return watchList;
+          }, function (v) {
+            // Wrap the social plugin code for FB.XFBML.parse
+            $FB.XFBML.parse(_wrap(iElm)[0], onrenderHandler);
+          }, true);
         }
       };
     }]);
-  };
-
-  angular.forEach([
-    'fbLike', 'fbShareButton', 'fbSend', 'fbPost',
-    'fbFollow', 'fbComments', 'fbActivity', 'fbRecommendations',
-    'fbRecommendationsBar', 'fbLikeBox', 'fbFacepile'
-  ], creatSocialPluginDirective);
-
+  }
 
 })(angular.module('ezfb', []));
