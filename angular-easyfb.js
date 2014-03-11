@@ -516,8 +516,6 @@
             }
 
             sameDigestTimeout = $timeout(function () {
-              console.log(v);
-
               renderId++;
               if (!rendering) {
                 rendering = true;

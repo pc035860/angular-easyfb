@@ -288,7 +288,7 @@ describe('social plugin directive', function () {
           expect(lastAttrs[attrNames[0]]).toEqual($scope.v0);
         });
 
-        iit('should call $FB.XFBML.parse with delay-interpolated attribute', function () {
+        it('should call $FB.XFBML.parse with delay-interpolated attribute', function () {
           var INTERPOLATE_0 = 150;
 
           var attrs = {}, lastAttrs;
@@ -309,13 +309,7 @@ describe('social plugin directive', function () {
 
           // attrNames[0] interpolated
           $timeout.flush(INTERPOLATE_0);
-
-          dump('a');
-
-          // dump($log.debug.logs);
-          makeItRendered(1);
-
-          dump('b');
+          nextDigestion();
 
           lastAttrs = lastLoggedAttrs();
           expect(lastAttrs[attrNames[0]]).toEqual($scope.v0);
@@ -369,6 +363,7 @@ describe('social plugin directive', function () {
 
           // attrNames[1] interpolated
           $timeout.flush(INTERPOLATE_1);  // at 250
+          nextDigestion();
           
           lastAttrs = lastLoggedAttrs();
           expect(lastAttrs[attrNames[0]]).toEqual($scope.v0);
