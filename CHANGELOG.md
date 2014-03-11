@@ -1,3 +1,7 @@
+## v0.3.1
+
+* Social plugin directivs now support interpolated attributes
+
 ## v0.3.0
 
 * `setLoadSDKFunction()` in configuration phase for sdk loading customization
