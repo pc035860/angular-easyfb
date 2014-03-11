@@ -487,8 +487,8 @@
         };
     
     module.directive(dirName, [
-             '$FB', '$log',
-    function ($FB,   $log) {
+             '$FB', '$log', '$timeout',
+    function ($FB,   $log,   $timeout) {
       return {
         restrict: 'EC',
         require: '?^ezfbXfbml',
@@ -500,25 +500,9 @@
             return;
           }
 
-          var rendering = true,
-              onrenderExp = iAttrs.onrender,
-              onrenderHandler = function () {
-                if (rendering) {
-                  if (onrenderExp) {
-                    scope.$eval(onrenderExp);
-                  }
-
-                  rendering = false;
-                  _unwrap(iElm);
-                }
-              };
-
-          // Unwrap on $destroy
-          iElm.bind('$destroy', function () {
-            if (_isWrapped(iElm)) {
-              _unwrap(iElm);
-            }
-          });
+          var rendering = false,
+              renderId = 0,
+              sameDigestTimeout = null;
 
           scope.$watch(function () {
             var watchList = [];
@@ -527,9 +511,49 @@
             });
             return watchList;
           }, function (v) {
-            // Wrap the social plugin code for FB.XFBML.parse
-            $FB.XFBML.parse(_wrap(iElm)[0], onrenderHandler);
+            if (sameDigestTimeout !== null) {
+              $timeout.cancel(sameDigestTimeout);
+            }
+
+            sameDigestTimeout = $timeout(function () {
+              console.log(v);
+
+              renderId++;
+              if (!rendering) {
+                rendering = true;
+
+                // Wrap the social plugin code for FB.XFBML.parse
+                $FB.XFBML.parse(_wrap(iElm)[0], genOnRenderHandler(renderId));
+              }
+              else {
+                // Already rendering, do not wrap
+                $FB.XFBML.parse(iElm.parent()[0], genOnRenderHandler(renderId));
+              }
+            }, 1);  // Better for testing lol
           }, true);
+
+          // Unwrap on $destroy
+          iElm.bind('$destroy', function () {
+            if (_isWrapped(iElm)) {
+              _unwrap(iElm);
+            }
+          });
+
+          function genOnRenderHandler(id) {
+            return function () {
+              var onrenderExp;
+
+              if (rendering && id === renderId) {
+                onrenderExp = iAttrs.onrender;
+                if (onrenderExp) {
+                  scope.$eval(onrenderExp);
+                }
+
+                rendering = false;
+                _unwrap(iElm);
+              }
+            };
+          }
         }
       };
     }]);

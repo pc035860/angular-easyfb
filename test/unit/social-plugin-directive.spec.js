@@ -1,27 +1,28 @@
-'use strict';
-
+/*jshint undef:false, multistr:true*/
 describe('social plugin directive', function () {
+  'use strict';
 
   var MODULE_NAME = 'ezfb',
       APP_ID = 'some fb app id',
-      DELAY = 999999999999,
+      DELAY = 10000,
       DIRECTIVES_CONFIG = {
         'fb:like':                ['href', 'kid_directed_site'],
-        'fb:share-button':        ['href', 'layout'],
-        'fb:send':                ['href', 'kid_directed_site'],
-        'fb:post':                ['href', 'width'],
-        'fb:follow':              ['href', 'kid_directed_site'],
-        'fb:comments':            ['href', 'width'],
-        'fb:activity':            ['site', 'app_id'],
-        'fb:recommendations':     ['site', 'app_id'],
-        'fb:recommendations-bar': ['href', 'site'],
-        'fb:like-box':            ['href', 'show_faces'],
-        'fb:facepile':            ['href', 'app_id']
+        // 'fb:share-button':        ['href', 'layout'],
+        // 'fb:send':                ['href', 'kid_directed_site'],
+        // 'fb:post':                ['href', 'width'],
+        // 'fb:follow':              ['href', 'kid_directed_site'],
+        // 'fb:comments':            ['href', 'width'],
+        // 'fb:activity':            ['site', 'app_id'],
+        // 'fb:recommendations':     ['site', 'app_id'],
+        // 'fb:recommendations-bar': ['href', 'site'],
+        // 'fb:like-box':            ['href', 'show_faces'],
+        // 'fb:facepile':            ['href', 'app_id']
       },
       INTERESTED_ATTRS = [
         'href', 'kid_directed_site', 'layout', 'width', 
         'site', 'show_faces', 'app_id'
-      ];
+      ],
+      PARSE_DELAY_BY = 100;
 
   var jqLite = angular.element;
 
@@ -51,13 +52,22 @@ describe('social plugin directive', function () {
 
   beforeEach(module(function ($provide) {
     $provide.decorator('$FB', function ($delegate, $log) {
+      var callCount = 1;
+
       /**
        * Mock $FB.XFBML.parse
        */
       $delegate.XFBML.parse = function (elm, callback) {
+        /**
+         * Makes different $timeout delay for each 
+         * @return {[type]} [description]
+         */
         $timeout(function () {
           (callback || angular.noop)();
-        }, DELAY);
+        }, PARSE_DELAY_BY * callCount);
+
+        callCount++;
+
         xfbmlParseSpy(elm, callback);
 
         var $elm = jqLite(elm), obj = {};
@@ -90,8 +100,18 @@ describe('social plugin directive', function () {
     dealoc(element);
   });
 
-  function makeItRendered () {
-    $timeout.flush();
+  function makeItRendered(callCount) {
+    if (callCount) {
+      $timeout.flush(PARSE_DELAY_BY * callCount);
+    }
+    else {
+      $timeout.flush();
+    }
+  }
+
+  function nextDigestion() {
+    // Simulate next digestion with delay flushing delay 1
+    $timeout.flush(1);
   }
 
   describe('ezfbXfbml', function () {
@@ -186,7 +206,12 @@ describe('social plugin directive', function () {
     }
 
     function lastLoggedAttrs () {
+      // $log.debug is called in the mocked $FB.XFBML.parse
       return $log.debug.logs[$log.debug.logs.length - 1][0];
+    }
+
+    function makeValue(attrName) {
+      return '_' + attrName + '_';
     }
 
     var WRAPPER_TAG_NAME = 'SPAN';
@@ -198,12 +223,18 @@ describe('social plugin directive', function () {
           compileDir(getTemplate(dirTag));
           $scope.$apply();
 
+          // One digestion delayed rendering
+          expect(xfbmlParseSpy.callCount).toEqual(0);
+
+          nextDigestion();
+
           expect(xfbmlParseSpy.callCount).toEqual(1);
         });
 
         it('should call $FB.XFBML.parse with wrapper element', function () {
           compileDir(getTemplate(dirTag));
           $scope.$apply();
+          nextDigestion();
           
           expect(xfbmlParseSpy.mostRecentCall.args[0]).toEqual(element.children()[0]);
         });
@@ -211,6 +242,7 @@ describe('social plugin directive', function () {
         it('should evaluate onrender expression after rendered', function () {
           compileDir(getTemplate(dirTag));
           $scope.$apply();
+          nextDigestion();
 
           expect(onrenderSpy.callCount).toEqual(0);
 
@@ -222,6 +254,7 @@ describe('social plugin directive', function () {
         it('should unwrap after rendered', function () {
           compileDir(getTemplate(dirTag));
           $scope.$apply();
+          nextDigestion();
 
           expect(element.children()[0].tagName).toEqual(WRAPPER_TAG_NAME);
 
@@ -233,6 +266,7 @@ describe('social plugin directive', function () {
         it("should unwrap on $destroy even hasn't been rendered", function () {
           compileDir(getTemplate(dirTag));
           $scope.$apply();
+          nextDigestion();
           
           expect(element.children()[0].tagName).toEqual(WRAPPER_TAG_NAME);
           
@@ -243,60 +277,106 @@ describe('social plugin directive', function () {
 
         it('should call $FB.XFBML.parse with interpolated attribute', function () {
           var attrs = {}, lastAttrs;
-          attrs[attrNames[0]] = '{{ v1 }}';
-          $scope.v1 = attrNames[0];
+          attrs[attrNames[0]] = '{{ v0 }}';
+          $scope.v0 = attrNames[0];
 
           compileDir(getTemplate(dirTag, attrs));
           $scope.$apply();
+          nextDigestion();
 
           lastAttrs = lastLoggedAttrs();
-          expect(lastAttrs[attrNames[0]]).toEqual($scope.v1);
+          expect(lastAttrs[attrNames[0]]).toEqual($scope.v0);
         });
 
-        it('should call $FB.XFBML.parse with delay-interpolated attribute', function () {
+        iit('should call $FB.XFBML.parse with delay-interpolated attribute', function () {
+          var INTERPOLATE_0 = 150;
+
           var attrs = {}, lastAttrs;
 
-          attrs[attrNames[0]] = '{{ v1 }}';
+          attrs[attrNames[0]] = '{{ v0 }}';
 
           $timeout(function () {
-            $scope.v1 = attrNames[0];
-          }, DELAY);
+            $scope.v0 = makeValue(attrNames[0]);
+          }, INTERPOLATE_0);
 
           compileDir(getTemplate(dirTag, attrs));
           $scope.$apply();
+          nextDigestion();
 
-          $timeout.flush();
+          // No attr interpolated
+          lastAttrs = lastLoggedAttrs();
+          expect(lastAttrs[attrNames[0]]).toBeFalsy();
+
+          // attrNames[0] interpolated
+          $timeout.flush(INTERPOLATE_0);
+
+          dump('a');
+
+          // dump($log.debug.logs);
+          makeItRendered(1);
+
+          dump('b');
 
           lastAttrs = lastLoggedAttrs();
-          expect(lastAttrs[attrNames[0]]).toEqual($scope.v1);
+          expect(lastAttrs[attrNames[0]]).toEqual($scope.v0);
         });
 
         it('should call $FB.XFBML.parse with correct attributes when they are interpolated staggerly', function () {
-          var attrs = {}, lastAttrs;
-          attrs[attrNames[0]] = '{{ v1 }}';
-          attrs[attrNames[1]] = '{{ v2 }}';
+          var INTERPOLATE_0 = 50,
+              INTERPOLATE_1 = 250;
+
+          var attrs = {}, lastAttrs, callElm;
+
+          attrs[attrNames[0]] = '{{ v0 }}';
+          attrs[attrNames[1]] = '{{ v1 }}';
 
           $timeout(function () {
-            $scope.v1 = attrNames[0];
-          }, 100);
+            $scope.v0 = makeValue(attrNames[0]);
+          }, INTERPOLATE_0);
           $timeout(function () {
-            $scope.v2 = attrNames[1];
-          }, 300);
+            $scope.v1 = makeValue(attrNames[1]);
+          }, INTERPOLATE_1);
 
           compileDir(getTemplate(dirTag, attrs));
           $scope.$apply();
+          nextDigestion();
 
-          $timeout.flush(100);
+          // No attr interpolated
+          lastAttrs = lastLoggedAttrs();
+          expect(lastAttrs[attrNames[0]]).toBeFalsy();
+          expect(lastAttrs[attrNames[1]]).toBeFalsy();
+          expect(xfbmlParseSpy.callCount).toEqual(1);
+          // Make sure there's no nesting of wrapper element
+          callElm = xfbmlParseSpy.mostRecentCall.args[0];
+          expect(jqLite(callElm).children()[0].tagName).toEqual(dirTag.toUpperCase());
+
+          // attrNames[0] interpolated
+          $timeout.flush(INTERPOLATE_0);  // at 50
+
+          // First call rendered
+          makeItRendered(1);  // at 100
 
           lastAttrs = lastLoggedAttrs();
-          expect(lastAttrs[attrNames[0]]).toEqual($scope.v1);
+          expect(lastAttrs[attrNames[0]]).toEqual($scope.v0);
           expect(lastAttrs[attrNames[1]]).toBeFalsy();
+          expect(xfbmlParseSpy.callCount).toEqual(2);
+          // Make sure there's no nesting of wrapper element
+          callElm = xfbmlParseSpy.mostRecentCall.args[0];
+          expect(jqLite(callElm).children()[0].tagName).toEqual(dirTag.toUpperCase());
 
-          $timeout.flush(300);
+          // Second call rendered
+          makeItRendered(2);  // at 200
+
+          // attrNames[1] interpolated
+          $timeout.flush(INTERPOLATE_1);  // at 250
           
           lastAttrs = lastLoggedAttrs();
-          expect(lastAttrs[attrNames[0]]).toEqual($scope.v1);
-          expect(lastAttrs[attrNames[1]]).toEqual($scope.v2);
+          expect(lastAttrs[attrNames[0]]).toEqual($scope.v0);
+          expect(lastAttrs[attrNames[1]]).toEqual($scope.v1);
+          expect(xfbmlParseSpy.callCount).toEqual(3);
+          // Make sure there's no nesting of wrapper element
+          callElm = xfbmlParseSpy.mostRecentCall.args[0];
+          expect(jqLite(callElm).children()[0].tagName).toEqual(dirTag.toUpperCase());
         });
       });
 
