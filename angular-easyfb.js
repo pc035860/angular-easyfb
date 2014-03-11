@@ -487,8 +487,8 @@
         };
     
     module.directive(dirName, [
-             '$FB', '$log', '$timeout',
-    function ($FB,   $log,   $timeout) {
+             '$FB',
+    function ($FB) {
       return {
         restrict: 'EC',
         require: '?^ezfbXfbml',
@@ -501,8 +501,7 @@
           }
 
           var rendering = false,
-              renderId = 0,
-              sameDigestTimeout = null;
+              renderId = 0;
 
           scope.$watch(function () {
             var watchList = [];
@@ -511,23 +510,17 @@
             });
             return watchList;
           }, function (v) {
-            if (sameDigestTimeout !== null) {
-              $timeout.cancel(sameDigestTimeout);
+            renderId++;
+            if (!rendering) {
+              rendering = true;
+
+              // Wrap the social plugin code for FB.XFBML.parse
+              $FB.XFBML.parse(_wrap(iElm)[0], genOnRenderHandler(renderId));
             }
-
-            sameDigestTimeout = $timeout(function () {
-              renderId++;
-              if (!rendering) {
-                rendering = true;
-
-                // Wrap the social plugin code for FB.XFBML.parse
-                $FB.XFBML.parse(_wrap(iElm)[0], genOnRenderHandler(renderId));
-              }
-              else {
-                // Already rendering, do not wrap
-                $FB.XFBML.parse(iElm.parent()[0], genOnRenderHandler(renderId));
-              }
-            }, 1);  // Better for testing lol
+            else {
+              // Already rendering, do not wrap
+              $FB.XFBML.parse(iElm.parent()[0], genOnRenderHandler(renderId));
+            }
           }, true);
 
           // Unwrap on $destroy
