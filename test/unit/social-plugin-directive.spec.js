@@ -4,19 +4,18 @@ describe('social plugin directive', function () {
 
   var MODULE_NAME = 'ezfb',
       APP_ID = 'some fb app id',
-      DELAY = 10000,
       DIRECTIVES_CONFIG = {
         'fb:like':                ['href', 'kid_directed_site'],
-        // 'fb:share-button':        ['href', 'layout'],
-        // 'fb:send':                ['href', 'kid_directed_site'],
-        // 'fb:post':                ['href', 'width'],
-        // 'fb:follow':              ['href', 'kid_directed_site'],
-        // 'fb:comments':            ['href', 'width'],
-        // 'fb:activity':            ['site', 'app_id'],
-        // 'fb:recommendations':     ['site', 'app_id'],
-        // 'fb:recommendations-bar': ['href', 'site'],
-        // 'fb:like-box':            ['href', 'show_faces'],
-        // 'fb:facepile':            ['href', 'app_id']
+        'fb:share-button':        ['href', 'layout'],
+        'fb:send':                ['href', 'kid_directed_site'],
+        'fb:post':                ['href', 'width'],
+        'fb:follow':              ['href', 'kid_directed_site'],
+        'fb:comments':            ['href', 'width'],
+        'fb:activity':            ['site', 'app_id'],
+        'fb:recommendations':     ['site', 'app_id'],
+        'fb:recommendations-bar': ['href', 'site'],
+        'fb:like-box':            ['href', 'show_faces'],
+        'fb:facepile':            ['href', 'app_id']
       },
       INTERESTED_ATTRS = [
         'href', 'kid_directed_site', 'layout', 'width', 
@@ -107,11 +106,6 @@ describe('social plugin directive', function () {
     else {
       $timeout.flush();
     }
-  }
-
-  function nextDigestion() {
-    // Simulate next digestion with delay flushing delay 1
-    $timeout.flush(1);
   }
 
   describe('ezfbXfbml', function () {
@@ -206,6 +200,9 @@ describe('social plugin directive', function () {
     }
 
     function lastLoggedAttrs () {
+      if ($log.debug.logs.length === 0) {
+        return null;
+      }
       // $log.debug is called in the mocked $FB.XFBML.parse
       return $log.debug.logs[$log.debug.logs.length - 1][0];
     }
@@ -221,12 +218,11 @@ describe('social plugin directive', function () {
       describe(toCamelCase(dirTag), function () {
         it('should call $FB.XFBML.parse once', function () {
           compileDir(getTemplate(dirTag));
-          $scope.$apply();
 
-          // One digestion delayed rendering
           expect(xfbmlParseSpy.callCount).toEqual(0);
 
-          nextDigestion();
+          // Called after $digest
+          $scope.$apply();
 
           expect(xfbmlParseSpy.callCount).toEqual(1);
         });
@@ -234,7 +230,6 @@ describe('social plugin directive', function () {
         it('should call $FB.XFBML.parse with wrapper element', function () {
           compileDir(getTemplate(dirTag));
           $scope.$apply();
-          nextDigestion();
           
           expect(xfbmlParseSpy.mostRecentCall.args[0]).toEqual(element.children()[0]);
         });
@@ -242,7 +237,6 @@ describe('social plugin directive', function () {
         it('should evaluate onrender expression after rendered', function () {
           compileDir(getTemplate(dirTag));
           $scope.$apply();
-          nextDigestion();
 
           expect(onrenderSpy.callCount).toEqual(0);
 
@@ -254,7 +248,6 @@ describe('social plugin directive', function () {
         it('should unwrap after rendered', function () {
           compileDir(getTemplate(dirTag));
           $scope.$apply();
-          nextDigestion();
 
           expect(element.children()[0].tagName).toEqual(WRAPPER_TAG_NAME);
 
@@ -266,7 +259,6 @@ describe('social plugin directive', function () {
         it("should unwrap on $destroy even hasn't been rendered", function () {
           compileDir(getTemplate(dirTag));
           $scope.$apply();
-          nextDigestion();
           
           expect(element.children()[0].tagName).toEqual(WRAPPER_TAG_NAME);
           
@@ -281,8 +273,10 @@ describe('social plugin directive', function () {
           $scope.v0 = attrNames[0];
 
           compileDir(getTemplate(dirTag, attrs));
+
+          expect(lastLoggedAttrs()).toBeFalsy();
+
           $scope.$apply();
-          nextDigestion();
 
           lastAttrs = lastLoggedAttrs();
           expect(lastAttrs[attrNames[0]]).toEqual($scope.v0);
@@ -301,7 +295,6 @@ describe('social plugin directive', function () {
 
           compileDir(getTemplate(dirTag, attrs));
           $scope.$apply();
-          nextDigestion();
 
           // No attr interpolated
           lastAttrs = lastLoggedAttrs();
@@ -309,7 +302,6 @@ describe('social plugin directive', function () {
 
           // attrNames[0] interpolated
           $timeout.flush(INTERPOLATE_0);
-          nextDigestion();
 
           lastAttrs = lastLoggedAttrs();
           expect(lastAttrs[attrNames[0]]).toEqual($scope.v0);
@@ -333,7 +325,6 @@ describe('social plugin directive', function () {
 
           compileDir(getTemplate(dirTag, attrs));
           $scope.$apply();
-          nextDigestion();
 
           // No attr interpolated
           lastAttrs = lastLoggedAttrs();
@@ -363,7 +354,6 @@ describe('social plugin directive', function () {
 
           // attrNames[1] interpolated
           $timeout.flush(INTERPOLATE_1);  // at 250
-          nextDigestion();
           
           lastAttrs = lastLoggedAttrs();
           expect(lastAttrs[attrNames[0]]).toEqual($scope.v0);
