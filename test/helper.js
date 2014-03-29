@@ -2,10 +2,10 @@
  * FB SDK Loading function for testing
  * We don't load real FB JS SDK in. We mock it with `mockSDKApi`
  * 
- * @param  {function} $fbAsyncInit module initialization function
+ * @param  {function} fbAsyncInit module initialization function
  */
-function mockSDKLoader($fbAsyncInit) {
-  $fbAsyncInit();
+function mockSDKLoader(ezfbAsyncInit) {
+  ezfbAsyncInit();
 }
 
 /**

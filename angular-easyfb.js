@@ -2,7 +2,7 @@
 (function (module) {
 
   module
-  .provider('$FB', function () {
+  .provider('ezfb', function () {
 
     var NO_CALLBACK = -1;
 
@@ -59,23 +59,23 @@
      * Default load SDK function
      *
      * Injectable local: 
-     *   $fbAsyncInit - module's private trigger of FB.init, should always be called to complete the $FB init process
-     *   $fbLocale    - configured SDK locale
+     *   ezfbAsyncInit - module's private trigger of FB.init, should always be called to complete the ezfb init process
+     *   ezfbLocale    - configured SDK locale
      */
     var _defaultLoadSDKFunction = [
-                   '$window', '$document', '$fbAsyncInit', '$fbLocale',
-          function ($window,   $document,   $fbAsyncInit,   $fbLocale) {
+                   '$window', '$document', 'ezfbAsyncInit', 'ezfbLocale',
+          function ($window,   $document,   ezfbAsyncInit,   ezfbLocale) {
             // Load the SDK's source Asynchronously
             (function(d){
               var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
               if (d.getElementById(id)) {return;}
               js = d.createElement('script'); js.id = id; js.async = true;
-              js.src = "//connect.facebook.net/" + $fbLocale + "/all.js";
-              // js.src = "//connect.facebook.net/" + $fbLocale + "/all/debug.js";  // debug
+              js.src = "//connect.facebook.net/" + ezfbLocale + "/all.js";
+              // js.src = "//connect.facebook.net/" + ezfbLocale + "/all/debug.js";  // debug
               ref.parentNode.insertBefore(js, ref);
             }($document[0]));
 
-            $window.fbAsyncInit = $fbAsyncInit;
+            $window.fbAsyncInit = ezfbAsyncInit;
           }],
         _loadSDKFunction = _defaultLoadSDKFunction;
 
@@ -83,13 +83,13 @@
      * Default init function
      *
      * Injectable locals: 
-     *   $fbInitParams - parameters provided by $FBProvider.setInitParams() or $FB.init()
+     *   ezfbInitParams - parameters provided by ezfbProvider.setInitParams() or ezfb.init()
      */
     var _defaultInitFunction = [
-                   '$window', '$fbInitParams', 
-          function ($window,   $fbInitParams) {
+                   '$window', 'ezfbInitParams', 
+          function ($window,   ezfbInitParams) {
             // Initialize the FB JS SDK
-            $window.FB.init($fbInitParams);
+            $window.FB.init(ezfbInitParams);
           }],
         _initFunction = _defaultInitFunction;
 
@@ -171,7 +171,7 @@
       $get: [
                '$window', '$q', '$document', '$parse', '$rootScope', '$injector',
       function ($window,   $q,   $document,   $parse,   $rootScope,   $injector) {
-        var _initReady, _$FB, _savedListeners, _paramsReady, fbAsyncInit;
+        var _initReady, _ezfb, _savedListeners, _paramsReady, ezfbAsyncInit;
 
         _savedListeners = {};
 
@@ -191,21 +191,21 @@
         }
 
         // Run load SDK function
-        fbAsyncInit = function () {
+        ezfbAsyncInit = function () {
           _paramsReady.promise.then(function() {
             // Run init function
-            $injector.invoke(_initFunction, null, {'$fbInitParams': _initParams});
+            $injector.invoke(_initFunction, null, {'ezfbInitParams': _initParams});
 
-            _$FB.$$ready = true;
+            _ezfb.$$ready = true;
             _initReady.resolve();
           });
         };
         $injector.invoke(_loadSDKFunction, null, {
-          '$fbAsyncInit': fbAsyncInit,
-          '$fbLocale': _locale
+          'ezfbAsyncInit': ezfbAsyncInit,
+          'ezfbLocale': _locale
         });
 
-        _$FB = {
+        _ezfb = {
           $$ready: false,
           init: function (params) {
             _config(_initParams, params);
@@ -214,14 +214,14 @@
         };
 
         /**
-         * _$FB initialization
+         * _ezfb initialization
          *
          * Publish FB APIs with auto-check ready state
          */
         angular.forEach(_publishedApis, function (cbArgIndex, apiPath) {
           var getter = $parse(apiPath),
               setter = getter.assign;
-          setter(_$FB, function () {
+          setter(_ezfb, function () {
             var apiCall = _proxy(function (args) {
               var dfd, replaceCallbackAt;
 
@@ -350,7 +350,7 @@
           });
         });
 
-        return _$FB;
+        return _ezfb;
       }]
     };
   })
@@ -368,8 +368,8 @@
    * @param {expr}    onrender   Evaluated every time content xfbml gets rendered.
    */
   .directive('ezfbXfbml', [
-           '$FB', '$parse', '$compile', '$timeout',
-  function ($FB,   $parse,   $compile,   $timeout) {
+           'ezfb', '$parse', '$compile', '$timeout',
+  function (ezfb,   $parse,   $compile,   $timeout) {
     return {
       restrict: 'EAC',
       controller: function () {
@@ -391,7 +391,7 @@
                 }
               };
 
-          $FB.XFBML.parse(iElm[0], onrenderHandler);
+          ezfb.XFBML.parse(iElm[0], onrenderHandler);
 
           /**
            * The trigger
@@ -404,7 +404,7 @@
 
               $compile(iElm.contents())(scope);
               $timeout(function () {
-                $FB.XFBML.parse(iElm[0], onrenderHandler);
+                ezfb.XFBML.parse(iElm[0], onrenderHandler);
               });
 
               // Reset the trigger if it's settable
@@ -487,8 +487,8 @@
         };
     
     module.directive(dirName, [
-             '$FB',
-    function ($FB) {
+             'ezfb',
+    function (ezfb) {
       return {
         restrict: 'EC',
         require: '?^ezfbXfbml',
@@ -515,11 +515,11 @@
               rendering = true;
 
               // Wrap the social plugin code for FB.XFBML.parse
-              $FB.XFBML.parse(_wrap(iElm)[0], genOnRenderHandler(renderId));
+              ezfb.XFBML.parse(_wrap(iElm)[0], genOnRenderHandler(renderId));
             }
             else {
               // Already rendering, do not wrap
-              $FB.XFBML.parse(iElm.parent()[0], genOnRenderHandler(renderId));
+              ezfb.XFBML.parse(iElm.parent()[0], genOnRenderHandler(renderId));
             }
           }, true);
 
