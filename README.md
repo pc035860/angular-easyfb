@@ -14,7 +14,6 @@ AngularJS + Facebook JavaScript SDK.
 #### Demos
 
 * [API demo](http://plnkr.co/edit/qclqht?p=preview)
-* [XFBML demo](http://plnkr.co/edit/eak9VY?p=preview)
 * [API demo (promise version)](http://plnkr.co/edit/UMUtFc?p=preview)
 * [Built-in social plugin directives demo](http://plnkr.co/edit/1c5cWB?p=preview)
 
@@ -39,7 +38,7 @@ bower install angular-easyfb
 
 ## Usage
 
-### `$FB` service
+### `ezfb` service
 
 #### Configuration
 
@@ -50,20 +49,20 @@ Configure the locale of the original FB script file. Default locale is `en_US`.
 ```js
 angular.module('myApp')
 
-.config(function ($FBProvider) {
-  $FBProvider.setLocale('zh_TW');
+.config(function (ezfbProvider) {
+  ezfbProvider.setLocale('zh_TW');
 });
 ```
 
 ###### `getInitParams` / `setInitParams`
 
-Configure parameters for the original `FB.init` with `$FBProvider.setInitParams`. (See also [`$FB.init`](#fbinit))
+Configure parameters for the original `FB.init` with `ezfbProvider.setInitParams`. (See also [`ezfb.init`](#fbinit))
 
 ```js
 angular.module('myApp')
 
-.config(function ($FBProvider) {
-  $FBProvider.setInitParams({
+.config(function (ezfbProvider) {
+  ezfbProvider.setInitParams({
     // This is my FB app id for plunker demo app
     appId: '386469651480295'
   });  
@@ -72,13 +71,13 @@ angular.module('myApp')
 
 ###### `getInitFunction` / `setInitFunction`
 
-Customize the original `FB.init` function call with services injection support. The initialization parameters set in `setInitParams` are available via local injection `$fbInitParams`.
+Customize the original `FB.init` function call with services injection support. The initialization parameters set in `setInitParams` are available via local injection `ezfbInitParams`.
 
 ```js
 // Default init function
-var _defaultInitFunction = ['$window', '$fbInitParams', function ($window, $fbInitParams) {
+var _defaultInitFunction = ['$window', 'ezfbInitParams', function ($window, ezfbInitParams) {
   // Initialize the FB JS SDK
-  $window.FB.init($fbInitParams);
+  $window.FB.init(ezfbInitParams);
 }];
 ```
 
@@ -86,18 +85,18 @@ Customization example:
 ```js
 angular.module('myApp')
 
-.config(function ($FBProvider) {
-  var myInitFunction = function ($window, $rootScope, $fbInitParams) {
+.config(function (ezfbProvider) {
+  var myInitFunction = function ($window, $rootScope, ezfbInitParams) {
     $window.FB.init({
       appId: '386469651480295'
     });
     // or
-    // $window.FB.init($fbInitParams);
+    // $window.FB.init(ezfbInitParams);
 
-    $rootScope.$broadcast('$onFBInit');
+    $rootScope.$broadcast('FB.init');
   };
 
-  $FBProvider.setInitFunction(myInitFunction);
+  ezfbProvider.setInitFunction(myInitFunction);
 });
 ```
 
@@ -105,25 +104,25 @@ angular.module('myApp')
 
 Customize Facebook JS SDK loading. The function also supports DI, with two more local injections:
 
-- `$fbLocale` - locale name
-- `$fbAsyncInit` - must called to finish the module initialization process
+- `ezfbLocale` - locale name
+- `ezfbAsyncInit` - must called to finish the module initialization process
 
 ```js
 // Default load SDK function
 var _defaultLoadSDKFunction = [
-         '$window', '$document', '$fbAsyncInit', '$fbLocale',
-function ($window,   $document,   $fbAsyncInit,   $fbLocale) {
+         '$window', '$document', 'ezfbAsyncInit', 'ezfbLocale',
+function ($window,   $document,   ezfbAsyncInit,   ezfbLocale) {
   // Load the SDK's source Asynchronously
   (function(d){
     var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
     if (d.getElementById(id)) {return;}
     js = d.createElement('script'); js.id = id; js.async = true;
-    js.src = "//connect.facebook.net/" + $fbLocale + "/all.js";
-    // js.src = "//connect.facebook.net/" + $fbLocale + "/all/debug.js";  // debug
+    js.src = "//connect.facebook.net/" + ezfbLocale + "/all.js";
+    // js.src = "//connect.facebook.net/" + ezfbLocale + "/all/debug.js";  // debug
     ref.parentNode.insertBefore(js, ref);
   }($document[0]));
 
-  $window.fbAsyncInit = $fbAsyncInit;
+  $window.fbAsyncInit = ezfbAsyncInit;
 }];
 ```
 
@@ -131,24 +130,24 @@ Customization example:
 ```js
 angular.module('myApp')
 
-.config(function ($FBProvider) {
+.config(function (ezfbProvider) {
   // Feasible config if the FB JS SDK script is already loaded
-  $FBProvider.setLoadSDKFunction(function ($fbAsyncInit) {
-    $fbAsyncInit();
+  ezfbProvider.setLoadSDKFunction(function (ezfbAsyncInit) {
+    ezfbAsyncInit();
   });
 });
 ```
 
 
-#### $FB.init
+#### ezfb.init
 
-In the case that you don't want to(or you can't) configure your `FB.init` parameters in configuration phase, you may use `$FB.init` in run phase. And any `$FB` API call will not run until `$FB.init` is called.
+In the case that you don't want to(or you can't) configure your `FB.init` parameters in configuration phase, you may use `ezfb.init` in run phase. And any `ezfb` API call will not run until `ezfb.init` is called.
 
 ```js
 angular.module('myApp')
 
-.run(function ($FB) {
-  $FB.init({
+.run(function (ezfb) {
+  ezfb.init({
     // This is my FB app id for plunker demo app
     appId: '386469651480295'
   });  
@@ -156,9 +155,9 @@ angular.module('myApp')
 ```
 
 
-#### using $FB
+#### using ezfb
 
-This is the original `FB` wrapping service, all `FB.*` APIs are available through `$FB.*`.
+This is the original `FB` wrapping service, all `FB.*` APIs are available through `ezfb.*`.
 
 No need to worry about FB script loading and Angular context applying at all.
 
@@ -169,11 +168,11 @@ angular.module('myApp')
 /**
  * Inject into controller
  */
-.controller('MainCtrl', function ($FB) {
+.controller('MainCtrl', function (ezfb) {
   /**
    * Origin: FB.getLoginStatus
    */
-  $FB.getLoginStatus(function (res) {
+  ezfb.getLoginStatus(function (res) {
     $scope.loginStatus = res;
 
     (more || angular.noop)();
@@ -182,7 +181,7 @@ angular.module('myApp')
   /**
    * Origin: FB.api
    */
-  $FB.api('/me', function (res) {
+  ezfb.api('/me', function (res) {
     $scope.apiMe = res;
   });
 });
@@ -193,15 +192,15 @@ Watch the [demo](http://plnkr.co/edit/qclqht?p=preview) to see it in action.
 
 #### $q promise support
 
-Support of $q promise create more possibility for `$FB` service.
+Support of $q promise create more possibility for `ezfb` service.
 
 **Only the APIs with callback support returning promise.**
 
 ##### Combine multiple api calls
 ```js
 $q.all([
-  $FB.api('/me'),
-  $FB.api('/me/likes')
+  ezfb.api('/me'),
+  ezfb.api('/me/likes')
 ])
 .then(function (rsvList) {
   // result of api('/me')
@@ -215,7 +214,7 @@ $q.all([
 Watch the [promise version api demo](http://plnkr.co/edit/UMUtFc?p=preview) to see it in action.
 
 
-### Social plugins support (v0.3.0)
+### Social plugins support
 
 [Facebook Social Plugins](https://developers.facebook.com/docs/plugins/) are now supported with built-in directives.
 
@@ -236,65 +235,6 @@ Additionally, you can add an `onrender` parameter to the social plugin directive
 
 [Demo2 (interpolated attributes)](http://plnkr.co/edit/gFM1LV?p=preview)
 
-
-### `ezfb-xfbml` directive (deprecated since v0.3.0)
-
-##### `ezfb-xfbml` directive doesn't and will not support interpolated parameters.
-
-```
-<ANY ezfb-xfbml[="{expression}"]
-     [onrender="{expression}"]
-   
-   {XFBML content}
-</ANY>
-```
-
-Simply put XFBML contents inside the directive.
-
-```html
-<!-- an embedded post plugin -->
-<div class="tab" ng-if="currentTab == 'Embedded Posts'" ezfb-xfbml>
-  <div class="fb-post" 
-       data-href="https://www.facebook.com/FacebookDevelopers/posts/10151471074398553"></div>
-</div>
-```
-
-#### `ezfb-xfbml` parameter
-
-The directive itself may work as an reload trigger, it will reload directive contents when `ezfb-xfbml` evaluates as `true`.
-
-Moreover, it'll try to reset `ezfb-xfbml` value to `false` after reload triggered(if the value is fed through an scope variable rather than an expression).
-
-```html
-<!-- button for triggering reload -->
-<button class="btn btn-primary" ng-click="model.reloadWidget['Comments'] = true">Trigger reload</button>
-
-<!-- a comments plugin -->
-<div class="tab" ng-if="currentTab == 'Comments'" ezfb-xfbml="model.reloadWidget['Comments']">
-  <div class="fb-comments" 
-       data-href="{{ pageUrl }}" 
-       data-width="{{ widgetWidth }}"></div>
-</div>
-```
-
-#### `onrender` parameter
-
-`onrender` expression will be evaluated every time the `ezfb-xfbml` target gets rendered.
-
-```html
-<div class="tab" 
-     ezfb-xfbml="model.reloadWidget['Like Button']" 
-     onrender="model.renderedWidget = 'Like Button'">
-     
-     <div class="fb-like" 
-          data-href="{{ pageUrl }}" 
-          data-width="{{ widgetWidth }}" 
-          data-show-faces="true" 
-          data-send="false"></div>
-</div>
-```
-
-Watch the [demo](http://plnkr.co/edit/eak9VY?p=preview) to see them in action.
 
 ## Changelog
 

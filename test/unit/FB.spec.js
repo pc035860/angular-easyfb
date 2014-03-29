@@ -1,6 +1,6 @@
 'use strict';
 
-describe('$FB', function () {
+describe('ezfb', function () {
 
   var MODULE_NAME = 'ezfb',
       APP_ID = 'some fb app id',
@@ -23,7 +23,7 @@ describe('$FB', function () {
 
   beforeEach(module(MODULE_NAME));
 
-  describe('configuration phase ($FBProvider)', function () {
+  describe('configuration phase (ezfbProvider)', function () {
     
     var loadSDKSpy, initSpy;
 
@@ -43,64 +43,64 @@ describe('$FB', function () {
       });
     });
 
-    function inject$FB () {
-      inject(function ($FB, _$rootScope_) {
+    function injectEzfb () {
+      inject(function (ezfb, _$rootScope_) {
         $rootScope = _$rootScope_;
       });
     }
 
     describe('.setLoadSDKFunction', function () {
       
-      it('should be called on $FB injection', function () {
-        module(function ($FBProvider) {
-          $FBProvider.setLoadSDKFunction(['$fbAsyncInit', '$fbLocale', loadSDKSpy]);
+      it('should be called on ezfb injection', function () {
+        module(function (ezfbProvider) {
+          ezfbProvider.setLoadSDKFunction(['ezfbAsyncInit', 'ezfbLocale', loadSDKSpy]);
         });
-        inject$FB();
+        injectEzfb();
 
         expect(loadSDKSpy.callCount).toEqual(1);
       });
 
-      it('should be able to be called with DI locals: $fbAsyncInit, $fbLocale', function () {
-        module(function ($FBProvider) {
-          $FBProvider.setLoadSDKFunction(['$fbAsyncInit', '$fbLocale', loadSDKSpy]);
+      it('should be able to be called with DI locals: ezfbAsyncInit, ezfbLocale', function () {
+        module(function (ezfbProvider) {
+          ezfbProvider.setLoadSDKFunction(['ezfbAsyncInit', 'ezfbLocale', loadSDKSpy]);
         });
-        inject$FB();
+        injectEzfb();
 
-        // $fbAsyncInit
+        // ezfbAsyncInit
         expect(typeof loadSDKSpy.mostRecentCall.args[0] === 'function').toBeTruthy();
-        // $fbLocale
+        // ezfbLocale
         expect(typeof loadSDKSpy.mostRecentCall.args[1] === 'string').toBeTruthy();
       });
     });
 
     describe('.setInitParams', function () {
 
-      beforeEach(module(function ($FBProvider) {
-        $FBProvider.setLoadSDKFunction(function ($fbAsyncInit) {
-          mockSDKLoader($fbAsyncInit);
-          loadSDKSpy($fbAsyncInit);
+      beforeEach(module(function (ezfbProvider) {
+        ezfbProvider.setLoadSDKFunction(function (ezfbAsyncInit) {
+          mockSDKLoader(ezfbAsyncInit);
+          loadSDKSpy(ezfbAsyncInit);
         });
       }));
 
       it('should cause SDK to be loaded', function () {
-        module(function ($FBProvider) {
-          $FBProvider.setInitParams({
+        module(function (ezfbProvider) {
+          ezfbProvider.setInitParams({
             appId: APP_ID
           });
         });
-        inject$FB();
+        injectEzfb();
 
         expect(loadSDKSpy.callCount).toEqual(1);
         expect(typeof loadSDKSpy.mostRecentCall.args[0] === 'function').toBeTruthy();
       });
 
       it('should have FB.init called with correct parameters', function () {
-        module(function ($FBProvider) {
-          $FBProvider.setInitParams({
+        module(function (ezfbProvider) {
+          ezfbProvider.setInitParams({
             appId: APP_ID
           });
         });
-        inject$FB();
+        injectEzfb();
         $rootScope.$apply();
 
         var expectedParams = angular.extend({}, DEFAULT_INIT_PARAMS, {appId: APP_ID});
@@ -110,21 +110,21 @@ describe('$FB', function () {
       });
 
       it('should have FB.init called even SDK is loaded asynchronously', function () {
-        module(function ($FBProvider) {
-          $FBProvider.setLoadSDKFunction([
-                   '$fbAsyncInit', '$timeout', 
-          function ($fbAsyncInit,   $timeout) {
+        module(function (ezfbProvider) {
+          ezfbProvider.setLoadSDKFunction([
+                   'ezfbAsyncInit', '$timeout', 
+          function (ezfbAsyncInit,   $timeout) {
             // Delay a bit
             $timeout(function () {
-              $fbAsyncInit();
+              ezfbAsyncInit();
             }, DELAY);
           }]);
           
-          $FBProvider.setInitParams({
+          ezfbProvider.setInitParams({
             appId: APP_ID
           });
         });
-        inject(function ($FB, $rootScope, $timeout) {
+        inject(function (ezfb, $rootScope, $timeout) {
           $rootScope.$apply();
           $timeout.flush();
 
@@ -134,11 +134,11 @@ describe('$FB', function () {
     });
 
     describe('.setLocale', function () {
-      beforeEach(module(function ($FBProvider) {
-        $FBProvider.setLoadSDKFunction(function ($fbLocale) {
-          loadSDKSpy($fbLocale);
+      beforeEach(module(function (ezfbProvider) {
+        ezfbProvider.setLoadSDKFunction(function (ezfbLocale) {
+          loadSDKSpy(ezfbLocale);
         });
-        $FBProvider.setInitParams({
+        ezfbProvider.setInitParams({
           appId: APP_ID
         });
       }));
@@ -146,10 +146,10 @@ describe('$FB', function () {
       it('should cause SDK to be loaded with given locale', function () {
         var LOCALE = 'zhTW';
 
-        module(function ($FBProvider) {
-          $FBProvider.setLocale(LOCALE);
+        module(function (ezfbProvider) {
+          ezfbProvider.setLocale(LOCALE);
         });
-        inject$FB();
+        injectEzfb();
 
         expect(loadSDKSpy.mostRecentCall.args[0]).toEqual(LOCALE);
       });
@@ -158,9 +158,9 @@ describe('$FB', function () {
     describe('.setInitFunction', function () {
       var customInitSpy;
 
-      beforeEach(module(function ($FBProvider) {
-        $FBProvider.setLoadSDKFunction(mockSDKLoader);
-        $FBProvider.setInitParams({
+      beforeEach(module(function (ezfbProvider) {
+        ezfbProvider.setLoadSDKFunction(mockSDKLoader);
+        ezfbProvider.setInitParams({
           appId: APP_ID
         });
       }));
@@ -170,20 +170,20 @@ describe('$FB', function () {
       });
 
       it('should call custom init function on init', function () {
-        module(function ($FBProvider) {
-          $FBProvider.setInitFunction(customInitSpy);
+        module(function (ezfbProvider) {
+          ezfbProvider.setInitFunction(customInitSpy);
         });
-        inject$FB();
+        injectEzfb();
         $rootScope.$apply();
 
         expect(customInitSpy.callCount).toEqual(1);
       });
 
-      it('should be able to be called with DI local: $fbInitParams', function () {
-        module(function ($FBProvider) {
-          $FBProvider.setInitFunction(['$fbInitParams', customInitSpy]);
+      it('should be able to be called with DI local: ezfbInitParams', function () {
+        module(function (ezfbProvider) {
+          ezfbProvider.setInitFunction(['ezfbInitParams', customInitSpy]);
         });
-        inject$FB();
+        injectEzfb();
         $rootScope.$apply();
 
         var expectedParams = angular.extend({}, DEFAULT_INIT_PARAMS, {appId: APP_ID});
@@ -206,8 +206,8 @@ describe('$FB', function () {
       fbMockCallbackSpy = jasmine.createSpy('fb api callback');
       fbMockPromiseSpy = jasmine.createSpy('fb api promise');
 
-      module(function ($FBProvider) {
-        $FBProvider.setLoadSDKFunction(mockSDKLoader);
+      module(function (ezfbProvider) {
+        ezfbProvider.setLoadSDKFunction(mockSDKLoader);
       });
     });
 
@@ -216,7 +216,7 @@ describe('$FB', function () {
        * Ref: https://developers.facebook.com/docs/javascript/reference/FB.init
        */
       
-      var $FB, $rootScope;
+      var ezfb, $rootScope;
 
       beforeEach(function () {
         mockSDKApi('init', function () {
@@ -225,14 +225,14 @@ describe('$FB', function () {
           fbMockCallSpy.apply(jasmine, args);
         });
 
-        inject(function (_$FB_, _$rootScope_) {
-          $FB = _$FB_;
+        inject(function (_ezfb_, _$rootScope_) {
+          ezfb = _ezfb_;
           $rootScope = _$rootScope_;
         });
       });
 
-      it('should call FB.init with correct parameters and set $FB.$$ready to `true`', function () {
-        $FB.init({
+      it('should call FB.init with correct parameters and set ezfb.$$ready to `true`', function () {
+        ezfb.init({
           appId: APP_ID
         });
 
@@ -244,7 +244,7 @@ describe('$FB', function () {
             appId: APP_ID
           })
         );
-        expect($FB.$$ready).toBeTruthy();
+        expect(ezfb.$$ready).toBeTruthy();
       });
 
     });
@@ -254,7 +254,7 @@ describe('$FB', function () {
        * Ref: https://developers.facebook.com/docs/javascript/reference/FB.api
        */
       
-      var $FB, $rootScope;
+      var ezfb, $rootScope;
 
       beforeEach(function () {
         mockSDKApi('api', function () {
@@ -273,20 +273,20 @@ describe('$FB', function () {
           }
         });
 
-        inject(function (_$FB_, _$rootScope_) {
-          $FB = _$FB_;
+        inject(function (_ezfb_, _$rootScope_) {
+          ezfb = _ezfb_;
           $rootScope = _$rootScope_;
         });
       });
       
       it('should call FB.api', function () {
-        $FB.init({
+        ezfb.init({
           appId: APP_ID
         });
 
-        $FB.api('/me');
-        $FB.api('/me', null);
-        $FB.api('/me', angular.noop);
+        ezfb.api('/me');
+        ezfb.api('/me', null);
+        ezfb.api('/me', angular.noop);
         $rootScope.$apply();
 
         expect(fbMockCallSpy.callCount).toEqual(3);
@@ -294,12 +294,12 @@ describe('$FB', function () {
 
       it('should call FB.api after FB.init is called', function () {
         inject(function ($timeout) {
-          $FB.api('/me');
+          ezfb.api('/me');
 
           $timeout(function () {
             expect(fbMockCallSpy.callCount).toEqual(0);
 
-            $FB.init({
+            ezfb.init({
               appId: APP_ID
             });
           }, DELAY)
@@ -311,23 +311,23 @@ describe('$FB', function () {
       });
 
       it('should trigger callbacks under different arguments situation with correct response', function () {
-        $FB.init({
+        ezfb.init({
           appId: APP_ID
         });
 
-        $FB.api('/me', fbMockCallbackSpy);
+        ezfb.api('/me', fbMockCallbackSpy);
         $rootScope.$apply();
 
         expect(fbMockCallbackSpy.mostRecentCall.args[0]).toEqual(API_RESPONSE);
 
 
-        $FB.api('/me', {fields: 'last_name'}, fbMockCallbackSpy);
+        ezfb.api('/me', {fields: 'last_name'}, fbMockCallbackSpy);
         $rootScope.$apply();
 
         expect(fbMockCallbackSpy.mostRecentCall.args[0]).toEqual(API_RESPONSE);
 
 
-        $FB.api('/me/feed', 'post', { message: 'post something' }, fbMockCallbackSpy);
+        ezfb.api('/me/feed', 'post', { message: 'post something' }, fbMockCallbackSpy);
         $rootScope.$apply();
 
         expect(fbMockCallbackSpy.mostRecentCall.args[0]).toEqual(API_RESPONSE);
@@ -337,23 +337,23 @@ describe('$FB', function () {
       });
 
       it('should trigger promise under different arguments situation with correct response', function () {
-        $FB.init({
+        ezfb.init({
           appId: APP_ID
         });
 
-        $FB.api('/me').then(fbMockPromiseSpy);
+        ezfb.api('/me').then(fbMockPromiseSpy);
         $rootScope.$apply();
 
         expect(fbMockPromiseSpy.mostRecentCall.args[0]).toEqual(API_RESPONSE);
 
 
-        $FB.api('/me', {fields: 'last_name'}).then(fbMockPromiseSpy);
+        ezfb.api('/me', {fields: 'last_name'}).then(fbMockPromiseSpy);
         $rootScope.$apply();
 
         expect(fbMockPromiseSpy.mostRecentCall.args[0]).toEqual(API_RESPONSE);
 
 
-        $FB.api('/me/feed', 'post', { message: 'post something' }).then(fbMockPromiseSpy);
+        ezfb.api('/me/feed', 'post', { message: 'post something' }).then(fbMockPromiseSpy);
         $rootScope.$apply();
 
         expect(fbMockPromiseSpy.mostRecentCall.args[0]).toEqual(API_RESPONSE);
@@ -363,11 +363,11 @@ describe('$FB', function () {
       });
 
       it('should trigger both callback and promise with correct response', function () {
-        $FB.init({
+        ezfb.init({
           appId: APP_ID
         });
 
-        $FB.api('/me', fbMockCallbackSpy).then(fbMockPromiseSpy);
+        ezfb.api('/me', fbMockCallbackSpy).then(fbMockPromiseSpy);
         $rootScope.$apply();
 
         expect(fbMockCallbackSpy.callCount).toEqual(1);
@@ -382,7 +382,7 @@ describe('$FB', function () {
        * Ref: https://developers.facebook.com/docs/javascript/reference/FB.ui
        */
       
-      var $FB, $rootScope;
+      var ezfb, $rootScope;
 
       var UI_PARAMS = {war: 1, machine: 2, rox: 3};
 
@@ -397,27 +397,27 @@ describe('$FB', function () {
           }
         });
 
-        inject(function (_$FB_, _$rootScope_) {
-          $FB = _$FB_;
+        inject(function (_ezfb_, _$rootScope_) {
+          ezfb = _ezfb_;
           $rootScope = _$rootScope_;
         });
 
-        $FB.init({
+        ezfb.init({
           appId: APP_ID
         });
       });
 
       it('should call FB.ui', function () {
-        $FB.ui(UI_PARAMS);
-        $FB.ui(UI_PARAMS, null);
-        $FB.ui(UI_PARAMS, angular.noop);
+        ezfb.ui(UI_PARAMS);
+        ezfb.ui(UI_PARAMS, null);
+        ezfb.ui(UI_PARAMS, angular.noop);
         $rootScope.$apply();
 
         expect(fbMockCallSpy.callCount).toEqual(3);
       });
 
       it('should trigger callback with correct response', function () {
-        $FB.ui(UI_PARAMS, fbMockCallbackSpy);
+        ezfb.ui(UI_PARAMS, fbMockCallbackSpy);
         $rootScope.$apply();
 
         expect(fbMockCallbackSpy.callCount).toEqual(1);
@@ -425,7 +425,7 @@ describe('$FB', function () {
       });
 
       it('should trigger promise with correct response ', function () {
-        $FB.ui(UI_PARAMS).then(fbMockPromiseSpy);
+        ezfb.ui(UI_PARAMS).then(fbMockPromiseSpy);
         $rootScope.$apply();
 
         expect(fbMockPromiseSpy.callCount).toEqual(1);
@@ -433,7 +433,7 @@ describe('$FB', function () {
       });
 
       it('should trigger both callback and promise with correct response', function () {
-        $FB.ui(UI_PARAMS, fbMockCallbackSpy).then(fbMockPromiseSpy);
+        ezfb.ui(UI_PARAMS, fbMockCallbackSpy).then(fbMockPromiseSpy);
         $rootScope.$apply();
 
         expect(fbMockCallbackSpy.callCount).toEqual(1);
@@ -448,7 +448,7 @@ describe('$FB', function () {
        * Ref: https://developers.facebook.com/docs/reference/javascript/FB.getAuthResponse
        */
       
-      var $FB, $rootScope;
+      var ezfb, $rootScope;
 
       beforeEach(function () {
         mockSDKApi('getAuthResponse', function () {
@@ -459,24 +459,24 @@ describe('$FB', function () {
           return API_RESPONSE;
         });
 
-        inject(function (_$FB_, _$rootScope_) {
-          $FB = _$FB_;
+        inject(function (_ezfb_, _$rootScope_) {
+          ezfb = _ezfb_;
           $rootScope = _$rootScope_;
         });
 
-        $FB.init({
+        ezfb.init({
           appId: APP_ID
         });
       });
 
       it('should call FB.getAuthResponse', function () {
-        $FB.getAuthResponse();
+        ezfb.getAuthResponse();
 
         expect(fbMockCallSpy.callCount).toEqual(1);
       });
 
       it('should retrieve synchronous response', function () {
-        expect($FB.getAuthResponse()).toEqual(API_RESPONSE);
+        expect(ezfb.getAuthResponse()).toEqual(API_RESPONSE);
       });
     });
 
@@ -493,7 +493,7 @@ describe('$FB', function () {
 
       describe('.' + apiName, function () {
         
-        var $FB, $rootScope;
+        var ezfb, $rootScope;
 
         beforeEach(function () {
           mockSDKApi(apiName, function () {
@@ -508,25 +508,25 @@ describe('$FB', function () {
             }
           });
 
-          inject(function (_$FB_, _$rootScope_) {
-            $FB = _$FB_;
+          inject(function (_ezfb_, _$rootScope_) {
+            ezfb = _ezfb_;
             $rootScope = _$rootScope_;
           });
 
-          $FB.init({
+          ezfb.init({
             appId: APP_ID
           });
         });
 
         it('should call FB.' + apiName, function () {
-          $FB[apiName]();
+          ezfb[apiName]();
           $rootScope.$apply();
 
           expect(fbMockCallSpy.callCount).toEqual(1);
         });
 
         it('should trigger callback with correct response', function () {
-          $FB[apiName](fbMockCallbackSpy);
+          ezfb[apiName](fbMockCallbackSpy);
           $rootScope.$apply();
 
           expect(fbMockCallbackSpy.callCount).toEqual(1);
@@ -536,7 +536,7 @@ describe('$FB', function () {
         });
 
         it('should trigger promise with correct response', function () {
-          $FB[apiName]().then(fbMockPromiseSpy);
+          ezfb[apiName]().then(fbMockPromiseSpy);
           $rootScope.$apply();
 
           expect(fbMockPromiseSpy.callCount).toEqual(1);
@@ -546,7 +546,7 @@ describe('$FB', function () {
         });
 
         it('should trigger both callback and promise with correct response', function () {
-          $FB[apiName](fbMockCallbackSpy).then(fbMockPromiseSpy);
+          ezfb[apiName](fbMockCallbackSpy).then(fbMockPromiseSpy);
           $rootScope.$apply();
 
           expect(fbMockCallbackSpy.callCount).toEqual(1);
@@ -564,7 +564,7 @@ describe('$FB', function () {
 
 
     describe('.XFBML.parse', function () {
-      var $FB, $rootScope, elm;
+      var ezfb, $rootScope, elm;
 
       beforeEach(function () {
         mockSDKApi('XFBML.parse', function () {
@@ -577,12 +577,12 @@ describe('$FB', function () {
           }
         });
 
-        inject(function (_$FB_, _$rootScope_) {
-          $FB = _$FB_;
+        inject(function (_ezfb_, _$rootScope_) {
+          ezfb = _ezfb_;
           $rootScope = _$rootScope_;
         });
 
-        $FB.init({
+        ezfb.init({
           appId: APP_ID
         });
 
@@ -590,19 +590,19 @@ describe('$FB', function () {
       });
 
       it('should call FB.XFBML.parse', function () {
-        $FB.XFBML.parse();
+        ezfb.XFBML.parse();
         $rootScope.$apply();
 
         expect(fbMockCallSpy.callCount).toEqual(1);
 
-        $FB.XFBML.parse(elm);
+        ezfb.XFBML.parse(elm);
         $rootScope.$apply();
 
         expect(fbMockCallSpy.callCount).toEqual(2);
       });
 
       it('should trigger callback with correct response', function () {
-        $FB.XFBML.parse(elm, fbMockCallbackSpy);
+        ezfb.XFBML.parse(elm, fbMockCallbackSpy);
         $rootScope.$apply();
 
         expect(fbMockCallbackSpy.callCount).toEqual(1);
@@ -610,7 +610,7 @@ describe('$FB', function () {
       });
 
       it('should trigger promise with correct response', function () {
-        $FB.XFBML.parse(elm).then(fbMockPromiseSpy);
+        ezfb.XFBML.parse(elm).then(fbMockPromiseSpy);
         $rootScope.$apply();
 
         expect(fbMockPromiseSpy.callCount).toEqual(1);
@@ -618,7 +618,7 @@ describe('$FB', function () {
       });
 
       it('should trigger both callback and promise with correct response', function () {
-        $FB.XFBML.parse(elm, fbMockCallbackSpy).then(fbMockPromiseSpy);
+        ezfb.XFBML.parse(elm, fbMockCallbackSpy).then(fbMockPromiseSpy);
         $rootScope.$apply();
 
         expect(fbMockCallbackSpy.callCount).toEqual(1);
@@ -719,7 +719,7 @@ describe('$FB', function () {
 
       var EVENT_NAME = 'edge.create';
       
-      var $FB, $rootScope;
+      var ezfb, $rootScope;
 
       var subSpy, subHandlerSpy, unsubSpy, subPromiseSpy;
 
@@ -740,12 +740,12 @@ describe('$FB', function () {
           }
         });
 
-        inject(function (_$FB_, _$rootScope_) {
-          $FB = _$FB_;
+        inject(function (_ezfb_, _$rootScope_) {
+          ezfb = _ezfb_;
           $rootScope = _$rootScope_;
         });
 
-        $FB.init({
+        ezfb.init({
           appId: APP_ID
         });
       });
@@ -756,14 +756,14 @@ describe('$FB', function () {
 
       describe('.subscribe', function () {
         it('should call FB.Event.subscribe', function () {
-          $FB.Event.subscribe(EVENT_NAME);
+          ezfb.Event.subscribe(EVENT_NAME);
           $rootScope.$apply();
 
           expect(subSpy.callCount).toEqual(1);
         });
 
         it('should trigger handler on event takes place', function () {
-          $FB.Event.subscribe(EVENT_NAME, subHandlerSpy);
+          ezfb.Event.subscribe(EVENT_NAME, subHandlerSpy);
           $rootScope.$apply();
 
           pubsub.pub(EVENT_NAME);
@@ -771,7 +771,7 @@ describe('$FB', function () {
         });
 
         it('should trigger promise on event takes place', function () {
-          $FB.Event.subscribe(EVENT_NAME).then(subPromiseSpy);
+          ezfb.Event.subscribe(EVENT_NAME).then(subPromiseSpy);
           $rootScope.$apply();
 
           pubsub.pub(EVENT_NAME);
@@ -779,7 +779,7 @@ describe('$FB', function () {
         });
 
         it('should trigger both handler and promise on event takes place', function () {
-          $FB.Event.subscribe(EVENT_NAME, subHandlerSpy).then(subPromiseSpy);
+          ezfb.Event.subscribe(EVENT_NAME, subHandlerSpy).then(subPromiseSpy);
           $rootScope.$apply();
 
           pubsub.pub(EVENT_NAME);
@@ -791,8 +791,8 @@ describe('$FB', function () {
           var aHandler = jasmine.createSpy('a'),
               bHandler = jasmine.createSpy('b');
 
-          $FB.Event.subscribe('a', aHandler);
-          $FB.Event.subscribe('b', bHandler);
+          ezfb.Event.subscribe('a', aHandler);
+          ezfb.Event.subscribe('b', bHandler);
           $rootScope.$apply();
 
           pubsub.pub('a');
@@ -807,16 +807,16 @@ describe('$FB', function () {
 
       describe('.unsubscribe', function () {
         it('should call FB.Event.unsubscribe', function () {
-          $FB.Event.unsubscribe(EVENT_NAME);
+          ezfb.Event.unsubscribe(EVENT_NAME);
           $rootScope.$apply();
 
           expect(unsubSpy.callCount).toEqual(1);
         });
 
         it('should trigger both handler and promise on event takes place if called without specifying handler or a different handler', function () {
-          $FB.Event.subscribe(EVENT_NAME, subHandlerSpy).then(subPromiseSpy);
-          $FB.Event.unsubscribe(EVENT_NAME);
-          $FB.Event.unsubscribe(EVENT_NAME, angular.noop);
+          ezfb.Event.subscribe(EVENT_NAME, subHandlerSpy).then(subPromiseSpy);
+          ezfb.Event.unsubscribe(EVENT_NAME);
+          ezfb.Event.unsubscribe(EVENT_NAME, angular.noop);
           $rootScope.$apply();
 
           pubsub.pub(EVENT_NAME);
@@ -825,8 +825,8 @@ describe('$FB', function () {
         });
 
         it('should not trigger either handler or promise after being called correctly', function () {
-          $FB.Event.subscribe(EVENT_NAME, subHandlerSpy).then(subPromiseSpy);
-          $FB.Event.unsubscribe(EVENT_NAME, subHandlerSpy);
+          ezfb.Event.subscribe(EVENT_NAME, subHandlerSpy).then(subPromiseSpy);
+          ezfb.Event.unsubscribe(EVENT_NAME, subHandlerSpy);
           $rootScope.$apply();
 
           pubsub.pub(EVENT_NAME);

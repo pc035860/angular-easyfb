@@ -1,3 +1,11 @@
+## v1.0.0
+
+* Rename service `$FB` to `ezfb`
+* Local DIs get renamed.
+  * `$fbInitParams` -> `ezfbInitParams`
+  * `$fbAsyncInit` -> `ezfbAsyncInit`
+  * `$fbLocale` -> `ezfbLocale`
+
 ## v0.3.1
 
 * Social plugin directivs now support interpolated attributes

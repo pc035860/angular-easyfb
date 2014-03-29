@@ -40,21 +40,21 @@ describe('social plugin directive', function () {
     mockSDKApi('init', angular.noop);
   });
 
-  beforeEach(module(MODULE_NAME, function ($FBProvider) {
-    $FBProvider.setLoadSDKFunction(function ($fbAsyncInit) {
-      $fbAsyncInit();
+  beforeEach(module(MODULE_NAME, function (ezfbProvider) {
+    ezfbProvider.setLoadSDKFunction(function (ezfbAsyncInit) {
+      ezfbAsyncInit();
     });
-    $FBProvider.setInitParams({
+    ezfbProvider.setInitParams({
       appId: APP_ID
     });
   }));
 
   beforeEach(module(function ($provide) {
-    $provide.decorator('$FB', function ($delegate, $log) {
+    $provide.decorator('ezfb', function ($delegate, $log) {
       var callCount = 1;
 
       /**
-       * Mock $FB.XFBML.parse
+       * Mock ezfb.XFBML.parse
        */
       $delegate.XFBML.parse = function (elm, callback) {
         /**
@@ -122,11 +122,11 @@ describe('social plugin directive', function () {
       ');
     });
 
-    it('should call $FB.XFBML.parse once', function () {
+    it('should call ezfb.XFBML.parse once', function () {
       expect(xfbmlParseSpy.callCount).toEqual(1);
     });
 
-    it('should call $FB.XFBML.parse with compiled element', function () {
+    it('should call ezfb.XFBML.parse with compiled element', function () {
       expect(xfbmlParseSpy.mostRecentCall.args[0]).toEqual(element.children()[0]);
     });
 
@@ -136,7 +136,7 @@ describe('social plugin directive', function () {
       expect(onrenderSpy.callCount).toEqual(1);
     });
 
-    it('should call $FB.XFBML.parse on triggering rerender', function () {
+    it('should call ezfb.XFBML.parse on triggering rerender', function () {
       makeItRendered();
       expect(xfbmlParseSpy.callCount).toEqual(1);
 
@@ -203,7 +203,7 @@ describe('social plugin directive', function () {
       if ($log.debug.logs.length === 0) {
         return null;
       }
-      // $log.debug is called in the mocked $FB.XFBML.parse
+      // $log.debug is called in the mocked ezfb.XFBML.parse
       return $log.debug.logs[$log.debug.logs.length - 1][0];
     }
 
@@ -216,7 +216,7 @@ describe('social plugin directive', function () {
     angular.forEach(DIRECTIVES_CONFIG, function (attrNames, dirTag) {
 
       describe(toCamelCase(dirTag), function () {
-        it('should call $FB.XFBML.parse once', function () {
+        it('should call ezfb.XFBML.parse once', function () {
           compileDir(getTemplate(dirTag));
 
           expect(xfbmlParseSpy.callCount).toEqual(0);
@@ -227,7 +227,7 @@ describe('social plugin directive', function () {
           expect(xfbmlParseSpy.callCount).toEqual(1);
         });
 
-        it('should call $FB.XFBML.parse with wrapper element', function () {
+        it('should call ezfb.XFBML.parse with wrapper element', function () {
           compileDir(getTemplate(dirTag));
           $scope.$apply();
           
@@ -267,7 +267,7 @@ describe('social plugin directive', function () {
           expect(element.children().length).toEqual(0);
         });
 
-        it('should call $FB.XFBML.parse with interpolated attribute', function () {
+        it('should call ezfb.XFBML.parse with interpolated attribute', function () {
           var attrs = {}, lastAttrs;
           attrs[attrNames[0]] = '{{ v0 }}';
           $scope.v0 = attrNames[0];
@@ -282,7 +282,7 @@ describe('social plugin directive', function () {
           expect(lastAttrs[attrNames[0]]).toEqual($scope.v0);
         });
 
-        it('should call $FB.XFBML.parse with delay-interpolated attribute', function () {
+        it('should call ezfb.XFBML.parse with delay-interpolated attribute', function () {
           var INTERPOLATE_0 = 150;
 
           var attrs = {}, lastAttrs;
@@ -307,7 +307,7 @@ describe('social plugin directive', function () {
           expect(lastAttrs[attrNames[0]]).toEqual($scope.v0);
         });
 
-        it('should call $FB.XFBML.parse with correct attributes when they are interpolated staggerly', function () {
+        it('should call ezfb.XFBML.parse with correct attributes when they are interpolated staggerly', function () {
           var INTERPOLATE_0 = 50,
               INTERPOLATE_1 = 250;
 
