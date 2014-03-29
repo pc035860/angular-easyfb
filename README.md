@@ -5,7 +5,7 @@ AngularJS + Facebook JavaScript SDK.
 #### Features
 
 * Full [Facebook JavaScript SDK](https://developers.facebook.com/docs/reference/javascript/) support
-* Seemless FB SDK initialization(asynchronouslly load script and FB.init)
+* Seamless FB SDK initialization (asynchronously load script and FB.init)
 * All SDK API callbacks are automatically applied with AngularJS context
 * Bundled a handy directive for parsing Facebook XFBML plugins dynamically (deprecated since v0.3.0)
 * Support both callback and $q promise
@@ -57,7 +57,7 @@ angular.module('myApp')
 
 ###### `getInitParams` / `setInitParams`
 
-Configure paramters for the original `FB.init` with `$FBProvider.setInitParams`. (See also [`$FB.init`](#fbinit))
+Configure parameters for the original `FB.init` with `$FBProvider.setInitParams`. (See also [`$FB.init`](#fbinit))
 
 ```js
 angular.module('myApp')
@@ -109,7 +109,7 @@ Customize Facebook JS SDK loading. The function also supports DI, with two more 
 - `$fbAsyncInit` - must called to finish the module initialization process
 
 ```js
-// Defaul load SDK function
+// Default load SDK function
 var _defaultLoadSDKFunction = [
          '$window', '$document', '$fbAsyncInit', '$fbLocale',
 function ($window,   $document,   $fbAsyncInit,   $fbLocale) {
@@ -259,7 +259,7 @@ Simply put XFBML contents inside the directive.
 </div>
 ```
 
-#### `ezfb-xfbml` paramater
+#### `ezfb-xfbml` parameter
 
 The directive itself may work as an reload trigger, it will reload directive contents when `ezfb-xfbml` evaluates as `true`.
 
@@ -334,5 +334,5 @@ grunt test:unit
 
 Test coverage:
 ```sh
-grunt converage
+grunt coverage
 ```
