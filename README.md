@@ -36,6 +36,37 @@ angular.module('myApp', ['ezfb']);
 bower install angular-easyfb
 ```
 
+### Usage with cordova facebook login plugin
+Using with cordova facebook plugin you need to add this lines to your html
+```html
+<script src="cordova.js"></script>
+<script src="cdv-plugin-fb-connect.js"></script>
+<script src="facebook-js-sdk.js"></script>
+```
+
+and configure ezfb to use cordova plugin
+```js
+angular.module('myApp')
+
+.config(function (ezfbProvider) {
+  ezfbProvider.setInitParams({
+    appId: '{APP ID}',
+    nativeInterface: CDV.FB,
+    useCachedDialogs: false
+  });
+  
+  ezfbProvider.setLoadSDKFunction(function ($document, ezfbAsyncInit) {
+    $document.on('deviceready', function () {
+      ezfbAsyncInit();
+    });
+  });
+})
+
+.run(function(ezfb) {
+  ezfb.init();
+});
+```
+
 ## Usage
 
 ### `ezfb` service
