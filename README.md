@@ -1,4 +1,4 @@
-# angular-easyfb
+# angular-easyfb v1.0.0 [![Build Status](https://travis-ci.org/pc035860/angular-easyfb.svg?branch=master)](https://travis-ci.org/pc035860/angular-easyfb)
 
 AngularJS + Facebook JavaScript SDK.
 
