@@ -11,6 +11,7 @@ describe('social plugin directive', function () {
         'fb:post':                ['href', 'width'],
         'fb:follow':              ['href', 'kid_directed_site'],
         'fb:comments':            ['href', 'width'],
+        'fb:comments-count':      ['href'],
         'fb:activity':            ['site', 'app_id'],
         'fb:recommendations':     ['site', 'app_id'],
         'fb:recommendations-bar': ['href', 'site'],
@@ -308,6 +309,10 @@ describe('social plugin directive', function () {
         });
 
         it('should call ezfb.XFBML.parse with correct attributes when they are interpolated staggerly', function () {
+          if (attrNames.length <= 1) {
+            return;
+          }
+
           var INTERPOLATE_0 = 50,
               INTERPOLATE_1 = 250;
 
