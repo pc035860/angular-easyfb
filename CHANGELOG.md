@@ -1,3 +1,7 @@
+## v1.0.1
+
+* Add [fb:comments-count](https://developers.facebook.com/docs/plugins/comments/#faqcount) directive
+
 ## v1.0.0
 
 * Rename service `$FB` to `ezfb`
