@@ -441,6 +441,9 @@
       'colorscheme', 'href', 'mobile', 'numPosts',
       'orderBy', 'width'
     ],
+    'fbCommentsCount': [
+      'href'
+    ],
     'fbActivity': [
       'action', 'appId', 'colorscheme', 'filter', 'header',
       'height', 'linktarget', 'maxAge', 'recommendations',
