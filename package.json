@@ -1,11 +1,11 @@
 {
   "name": "angular-easyfb",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Super easy AngularJS + Facebook JavaScript SDK.",
   "main": "index.js",
   "directories": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "grunt test"
   },
   "repository": {
     "type": "git",
