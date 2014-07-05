@@ -8,7 +8,8 @@ describe('ezfb', function () {
       DEFAULT_INIT_PARAMS = {
         status     : true,
         cookie     : true,
-        xfbml      : true
+        xfbml      : true,
+        version    : 'v1.0'
       };
 
   var jqLite = angular.element;

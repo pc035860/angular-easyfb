@@ -48,11 +48,13 @@
 
     // Default init parameters
     var _initParams = {
-      // appId      : '', // App ID from the App Dashboard
-      // channelUrl : '', // Channel File for x-domain communication
+      // appId      : '{your-app-id}', // App ID from the App Dashboard
       status     : true, // check the login status upon init?
       cookie     : true, // set sessions cookies to allow your server to access the session?
-      xfbml      : true  // parse XFBML tags on this page?
+      xfbml      : true,  // parse XFBML tags on this page?
+
+      // version information: https://developers.facebook.com/docs/apps/changelog/
+      version    : 'v1.0'
     };
     
     /**
@@ -70,8 +72,8 @@
               var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
               if (d.getElementById(id)) {return;}
               js = d.createElement('script'); js.id = id; js.async = true;
-              js.src = "//connect.facebook.net/" + ezfbLocale + "/all.js";
-              // js.src = "//connect.facebook.net/" + ezfbLocale + "/all/debug.js";  // debug
+              js.src = "//connect.facebook.net/" + ezfbLocale + "/sdk.js";
+              // js.src = "//connect.facebook.net/" + ezfbLocale + "/sdk/debug.js";  // debug
               ref.parentNode.insertBefore(js, ref);
             }($document[0]));
 
