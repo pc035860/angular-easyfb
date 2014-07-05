@@ -1,3 +1,8 @@
+## v1.1.0
+
+* Upgrade Facebook JS SDK loading function to support [Facebook Platform versioning](https://developers.facebook.com/docs/apps/changelog/)
+  * Default version is `v1.0`
+
 ## v1.0.1
 
 * Add [fb:comments-count](https://developers.facebook.com/docs/plugins/comments/#faqcount) directive
