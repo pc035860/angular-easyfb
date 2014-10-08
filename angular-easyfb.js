@@ -204,6 +204,18 @@
             // Run init function
             $injector.invoke(_initFunction, null, {'ezfbInitParams': _initParams});
 
+            // Reference AppEvents.EventNames, AppEvents.ParameterNames
+            var AppEvents = $window.FB.AppEvents;
+            if (AppEvents) {
+              _ezfb.AppEvents = _ezfb.AppEvents || {};
+              if (AppEvents.EventNames) {
+                _ezfb.AppEvents.EventNames = AppEvents.EventNames;
+              }
+              if (AppEvents.ParameterNames) {
+                _ezfb.AppEvents.ParameterNames = AppEvents.ParameterNames;
+              }
+            }
+
             _ezfb.$$ready = true;
             _initReady.resolve();
           });
