@@ -838,7 +838,9 @@ describe('ezfb', function () {
 
     });
 
-    // TODO: Canvas.* APIs
+    // TODO: 
+    //   Canvas.* APIs?
+    //   AppEvents.* APIs?
   });
 
 });

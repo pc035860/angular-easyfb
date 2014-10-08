@@ -13,14 +13,14 @@
      */
     var _publishedApis = {
       // core
-      api: [1, 2, 3],
-      ui: 1,
+      'api': [1, 2, 3],
+      'ui': 1,
 
       // auth
-      getAuthResponse: NO_CALLBACK,
-      getLoginStatus: 0,
-      login: 0,
-      logout: 0,
+      'getAuthResponse': NO_CALLBACK,
+      'getLoginStatus': 0,
+      'login': 0,
+      'logout': 0,
 
       // event
       'Event.subscribe': 1,
@@ -40,7 +40,13 @@
       'Canvas.setUrlHandler': 0,
       'Canvas.showFlashElement': NO_CALLBACK,
       'Canvas.startTimer': NO_CALLBACK,
-      'Canvas.stopTimer': 0
+      'Canvas.stopTimer': 0,
+
+      // app events for canvas apps
+      // https://developers.facebook.com/docs/canvas/appevents
+      'AppEvents.logEvent': NO_CALLBACK,
+      'AppEvents.logPurchase': NO_CALLBACK,
+      'AppEvents.activateApp': NO_CALLBACK
     };
 
     // Default locale
