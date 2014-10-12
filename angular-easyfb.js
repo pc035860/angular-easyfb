@@ -4,6 +4,35 @@
   module
   .provider('ezfb', function () {
 
+    // Borrow this from sdk/debug.js
+    var APP_EVENTS_EVENT_NAMES = {
+          COMPLETED_REGISTRATION: 'fb_mobile_complete_registration',
+          VIEWED_CONTENT: 'fb_mobile_content_view',
+          SEARCHED: 'fb_mobile_search',
+          RATED: 'fb_mobile_rate',
+          COMPLETED_TUTORIAL: 'fb_mobile_tutorial_completion',
+          ADDED_TO_CART: 'fb_mobile_add_to_cart',
+          ADDED_TO_WISHLIST: 'fb_mobile_add_to_wishlist',
+          INITIATED_CHECKOUT: 'fb_mobile_initiated_checkout',
+          ADDED_PAYMENT_INFO: 'fb_mobile_add_payment_info',
+          ACHIEVED_LEVEL: 'fb_mobile_level_achieved',
+          UNLOCKED_ACHIEVEMENT: 'fb_mobile_achievement_unlocked',
+          SPENT_CREDITS: 'fb_mobile_spent_credits'
+        },
+        APP_EVENTS_PARAMETER_NAMES = {
+          CURRENCY: 'fb_currency',
+          REGISTRATION_METHOD: 'fb_registration_method',
+          CONTENT_TYPE: 'fb_content_type',
+          CONTENT_ID: 'fb_content_id',
+          SEARCH_STRING: 'fb_search_string',
+          SUCCESS: 'fb_success',
+          MAX_RATING_VALUE: 'fb_max_rating_value',
+          PAYMENT_INFO_AVAILABLE: 'fb_payment_info_available',
+          NUM_ITEMS: 'fb_num_items',
+          LEVEL: 'fb_level',
+          DESCRIPTION: 'fb_description'
+        };
+
     var NO_CALLBACK = -1;
 
     /**
@@ -204,18 +233,6 @@
             // Run init function
             $injector.invoke(_initFunction, null, {'ezfbInitParams': _initParams});
 
-            // Reference AppEvents.EventNames, AppEvents.ParameterNames
-            var AppEvents = $window.FB.AppEvents;
-            if (AppEvents) {
-              _ezfb.AppEvents = _ezfb.AppEvents || {};
-              if (AppEvents.EventNames) {
-                _ezfb.AppEvents.EventNames = AppEvents.EventNames;
-              }
-              if (AppEvents.ParameterNames) {
-                _ezfb.AppEvents.ParameterNames = AppEvents.ParameterNames;
-              }
-            }
-
             _ezfb.$$ready = true;
             _initReady.resolve();
           });
@@ -230,6 +247,10 @@
           init: function (params) {
             _config(_initParams, params);
             _paramsReady.resolve();
+          },
+          AppEvents: {
+            EventNames: APP_EVENTS_EVENT_NAMES,
+            ParameterNames: APP_EVENTS_PARAMETER_NAMES
           }
         };
 
