@@ -61,6 +61,7 @@
       // canvas
       'Canvas.Prefetcher.addStaticResource': NO_CALLBACK,
       'Canvas.Prefetcher.setCollectionMode': NO_CALLBACK,
+      'Canvas.getPageInfo': 0,
       'Canvas.hideFlashElement': NO_CALLBACK,
       'Canvas.scrollTo': NO_CALLBACK,
       'Canvas.setAutoGrow': NO_CALLBACK,
