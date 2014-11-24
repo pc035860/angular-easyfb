@@ -4,6 +4,35 @@
   module
   .provider('ezfb', function () {
 
+    // Borrow this from sdk/debug.js
+    var APP_EVENTS_EVENT_NAMES = {
+          COMPLETED_REGISTRATION: 'fb_mobile_complete_registration',
+          VIEWED_CONTENT: 'fb_mobile_content_view',
+          SEARCHED: 'fb_mobile_search',
+          RATED: 'fb_mobile_rate',
+          COMPLETED_TUTORIAL: 'fb_mobile_tutorial_completion',
+          ADDED_TO_CART: 'fb_mobile_add_to_cart',
+          ADDED_TO_WISHLIST: 'fb_mobile_add_to_wishlist',
+          INITIATED_CHECKOUT: 'fb_mobile_initiated_checkout',
+          ADDED_PAYMENT_INFO: 'fb_mobile_add_payment_info',
+          ACHIEVED_LEVEL: 'fb_mobile_level_achieved',
+          UNLOCKED_ACHIEVEMENT: 'fb_mobile_achievement_unlocked',
+          SPENT_CREDITS: 'fb_mobile_spent_credits'
+        },
+        APP_EVENTS_PARAMETER_NAMES = {
+          CURRENCY: 'fb_currency',
+          REGISTRATION_METHOD: 'fb_registration_method',
+          CONTENT_TYPE: 'fb_content_type',
+          CONTENT_ID: 'fb_content_id',
+          SEARCH_STRING: 'fb_search_string',
+          SUCCESS: 'fb_success',
+          MAX_RATING_VALUE: 'fb_max_rating_value',
+          PAYMENT_INFO_AVAILABLE: 'fb_payment_info_available',
+          NUM_ITEMS: 'fb_num_items',
+          LEVEL: 'fb_level',
+          DESCRIPTION: 'fb_description'
+        };
+
     var NO_CALLBACK = -1;
 
     /**
@@ -13,14 +42,14 @@
      */
     var _publishedApis = {
       // core
-      api: [1, 2, 3],
-      ui: 1,
+      'api': [1, 2, 3],
+      'ui': 1,
 
       // auth
-      getAuthResponse: NO_CALLBACK,
-      getLoginStatus: 0,
-      login: 0,
-      logout: 0,
+      'getAuthResponse': NO_CALLBACK,
+      'getLoginStatus': 0,
+      'login': 0,
+      'logout': 0,
 
       // event
       'Event.subscribe': 1,
@@ -32,6 +61,7 @@
       // canvas
       'Canvas.Prefetcher.addStaticResource': NO_CALLBACK,
       'Canvas.Prefetcher.setCollectionMode': NO_CALLBACK,
+      'Canvas.getPageInfo': 0,
       'Canvas.hideFlashElement': NO_CALLBACK,
       'Canvas.scrollTo': NO_CALLBACK,
       'Canvas.setAutoGrow': NO_CALLBACK,
@@ -40,7 +70,13 @@
       'Canvas.setUrlHandler': 0,
       'Canvas.showFlashElement': NO_CALLBACK,
       'Canvas.startTimer': NO_CALLBACK,
-      'Canvas.stopTimer': 0
+      'Canvas.stopTimer': 0,
+
+      // app events for canvas apps
+      // https://developers.facebook.com/docs/canvas/appevents
+      'AppEvents.logEvent': NO_CALLBACK,
+      'AppEvents.logPurchase': NO_CALLBACK,
+      'AppEvents.activateApp': NO_CALLBACK
     };
 
     // Default locale
@@ -212,6 +248,10 @@
           init: function (params) {
             _config(_initParams, params);
             _paramsReady.resolve();
+          },
+          AppEvents: {
+            EventNames: APP_EVENTS_EVENT_NAMES,
+            ParameterNames: APP_EVENTS_PARAMETER_NAMES
           }
         };
 

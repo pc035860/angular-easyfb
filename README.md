@@ -1,4 +1,4 @@
-# angular-easyfb v1.1.0 [![Build Status](https://travis-ci.org/pc035860/angular-easyfb.svg?branch=master)](https://travis-ci.org/pc035860/angular-easyfb)
+# angular-easyfb v1.2.0 [![Build Status](https://travis-ci.org/pc035860/angular-easyfb.svg?branch=master)](https://travis-ci.org/pc035860/angular-easyfb)
 
 AngularJS + Facebook JavaScript SDK.
 
@@ -21,6 +21,7 @@ AngularJS + Facebook JavaScript SDK.
 * [API demo (promise version)](http://plnkr.co/edit/UMUtFc?p=preview)
 * [Built-in social plugin directives demo](http://plnkr.co/edit/1c5cWB?p=preview)
 
+
 ## Getting started
 
 Include the angular-easyfb module with AngularJS script in your page.
@@ -38,37 +39,6 @@ angular.module('myApp', ['ezfb']);
 
 ```sh
 bower install angular-easyfb
-```
-
-### Usage with cordova facebook login plugin
-Using with cordova facebook plugin you need to add this lines to your html
-```html
-<script src="cordova.js"></script>
-<script src="cdv-plugin-fb-connect.js"></script>
-<script src="facebook-js-sdk.js"></script>
-```
-
-and configure ezfb to use cordova plugin
-```js
-angular.module('myApp')
-
-.config(function (ezfbProvider) {
-  ezfbProvider.setInitParams({
-    appId: '{APP ID}',
-    nativeInterface: CDV.FB,
-    useCachedDialogs: false
-  });
-  
-  ezfbProvider.setLoadSDKFunction(function ($document, ezfbAsyncInit) {
-    $document.on('deviceready', function () {
-      ezfbAsyncInit();
-    });
-  });
-})
-
-.run(function(ezfb) {
-  ezfb.init();
-});
 ```
 
 ## Usage

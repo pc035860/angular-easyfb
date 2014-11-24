@@ -838,7 +838,132 @@ describe('ezfb', function () {
 
     });
 
-    // TODO: Canvas.* APIs
+    describe('.AppEvents', function () {
+      /**
+       * Ref:
+       *   https://developers.facebook.com/docs/canvas/appevents
+       */
+
+          // FB.AppEvents.EventNames
+      var EVENTS = [
+            'ACHIEVED_LEVEL', 'ADDED_PAYMENT_INFO',
+            'ADDED_TO_CART', 'ADDED_TO_WISHLIST',
+            'COMPLETED_REGISTRATION', 'COMPLETED_TUTORIAL',
+            'INITIATED_CHECKOUT', 'RATED', 'SEARCHED',
+            'SPENT_CREDITS', 'UNLOCKED_ACHIEVEMENT',
+            'VIEWED_CONTENT'
+          ],
+          // FB.AppEvents.ParameterNames
+          PARAMS = [
+            'CONTENT_ID', 'CONTENT_TYPE', 'CURRENCY',
+            'DESCRIPTION', 'LEVEL', 'MAX_RATING_VALUE',
+            'NUM_ITEMS', 'PAYMENT_INFO_AVAILABLE',
+            'REGISTRATION_METHOD', 'SEARCH_STRING',
+            'SUCCESS'
+          ];
+
+
+      var ezfb, $rootScope;
+
+      describe('.EventNames', function () {
+        beforeEach(function () {
+          inject(function (_ezfb_, _$rootScope_) {
+            ezfb = _ezfb_;
+            $rootScope = _$rootScope_;
+          });
+          
+          ezfb.init({
+            appId: APP_ID
+          });
+        });
+
+        it('should exist', function () {
+          expect(ezfb.AppEvents.EventNames).not.toBeUndefined();
+        });
+
+        angular.forEach(EVENTS, function (name) {
+          it('should have name `'+ name +'`', function () {
+            expect(ezfb.AppEvents.EventNames[name]).not.toBeUndefined();
+          });
+        });
+      });
+
+      describe('.ParameterNames', function () {
+        beforeEach(function () {
+          inject(function (_ezfb_, _$rootScope_) {
+            ezfb = _ezfb_;
+            $rootScope = _$rootScope_;
+          });
+          
+          ezfb.init({
+            appId: APP_ID
+          });
+        });
+
+        it('should exist', function () {
+          expect(ezfb.AppEvents.ParameterNames).not.toBeUndefined();
+        });
+
+        angular.forEach(PARAMS, function (name) {
+          it('should have name `'+ name +'`', function () {
+            expect(ezfb.AppEvents.ParameterNames[name]).not.toBeUndefined();
+          });
+        });
+      });
+
+      angular.forEach([
+        'activateApp', 'logEvent', 'logPurchase'
+      ], function (apiName) {
+        describe('.'+ apiName, function () {
+          beforeEach(function () {
+            // They don't have callback
+            mockSDKApi('AppEvents.'+ apiName, function () {
+              var args = [].slice.call(arguments);
+
+              fbMockCallSpy.apply(jasmine, args);
+            });
+
+            inject(function (_ezfb_, _$rootScope_) {
+              ezfb = _ezfb_;
+              $rootScope = _$rootScope_;
+            });
+            
+            ezfb.init({
+              appId: APP_ID
+            });
+          });
+
+          it('should exists', function () {
+            expect(ezfb.AppEvents[apiName]).not.toBeUndefined();
+          });
+
+          it('should call `FB.AppEvents.'+ apiName +'` with correct parameters', function () {
+            var ARGS;
+
+            switch (apiName) {
+              case 'activateApp':
+                ARGS = [];
+                break;
+              case 'logEvent':
+                ARGS = ['eventName', 0.1, {'parameters': 1}];
+                break;
+              case 'logPurchase':
+                ARGS = [0.99, 'TWD', {'parameters': 1}];
+                break;
+            }
+
+            ezfb.AppEvents[apiName].apply(ezfb, ARGS);
+            $rootScope.$apply();
+
+            expect(fbMockCallSpy.callCount).toEqual(1);
+            expect(fbMockCallSpy.mostRecentCall.args).toEqualData(ARGS);
+          });
+        });
+      });
+    });
+
+    // TODO: 
+    //   Canvas.* APIs?
   });
 
 });
