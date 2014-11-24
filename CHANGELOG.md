@@ -1,3 +1,7 @@
+## v1.2.1
+
+* Add API support: `Canvas.getPageInfo` ([#40](https://github.com/pc035860/angular-easyfb/pull/40))
+
 ## v1.2.0
 
 * Add [App Events for Canvas](https://developers.facebook.com/docs/canvas/appevents) support. [#39](https://github.com/pc035860/angular-easyfb/issues/39)
