@@ -506,6 +506,9 @@
     'fbFacepile': [
       'action', 'appId', 'colorscheme', 'href', 'maxRows',
       'size', 'width'
+    ],
+    'fbPage': [
+      'href', 'ref', 'share', 'showFaces', 'width', 'height', 'hide_cover', 'show_facepile', 'show_posts'
     ]
   };
 
