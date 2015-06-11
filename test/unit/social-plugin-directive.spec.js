@@ -213,7 +213,7 @@ describe('social plugin directive', function () {
       return '_' + attrName + '_';
     }
 
-    var WRAPPER_TAG_NAME = 'SPAN';
+    var WRAPPER_CLASS = 'ezfb-social-plugin-wrap';
 
     angular.forEach(DIRECTIVES_CONFIG, function (attrNames, dirTag) {
 
@@ -251,7 +251,8 @@ describe('social plugin directive', function () {
           compileDir(getTemplate(dirTag));
           $scope.$apply();
 
-          expect(element.children()[0].tagName).toEqual(WRAPPER_TAG_NAME);
+          var classList = Array.prototype.slice.call(element.children()[0].classList);
+          expect(classList.indexOf(WRAPPER_CLASS) >= 0).toBeTruthy();
 
           makeItRendered();
 
@@ -262,7 +263,8 @@ describe('social plugin directive', function () {
           compileDir(getTemplate(dirTag));
           $scope.$apply();
           
-          expect(element.children()[0].tagName).toEqual(WRAPPER_TAG_NAME);
+          var classList = Array.prototype.slice.call(element.children()[0].classList);
+          expect(classList.indexOf(WRAPPER_CLASS) >= 0).toBeTruthy();
           
           destroyDirectiveElement();
           

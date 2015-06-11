@@ -88,6 +88,9 @@
       status     : true, // check the login status upon init?
       cookie     : true, // set sessions cookies to allow your server to access the session?
       xfbml      : true,  // parse XFBML tags on this page?
+
+      // version information: https://developers.facebook.com/docs/apps/changelog/
+      version    : 'v2.0'
     };
     
     /**
@@ -512,18 +515,27 @@
   angular.forEach(_socialPluginDirectiveConfig, creatSocialPluginDirective);
 
   function creatSocialPluginDirective(availableAttrs, dirName) {
-    var CLASS_WRAP_SPAN = 'ezfb-social-plugin-wrap',
+    var CLASS_WRAP = 'ezfb-social-plugin-wrap',
         STYLE_WRAP_SPAN = 'display: inline-block; width: 0; height: 0; overflow: hidden;';
+
+    // Adpative width plugins
+    // e.g. https://developers.facebook.com/docs/plugins/page-plugin#adaptive-width
+    var PLUGINS_WITH_ADAPTIVE_WIDTH = ['fbPage'];
     
     /**
      * Wrap-related functions
      */
     var _wrap = function ($elm) {
-          var tmpl = '<span class="'+CLASS_WRAP_SPAN+'" style="'+STYLE_WRAP_SPAN+'">';
+          var tmpl = '<span class="'+CLASS_WRAP+'" style="'+STYLE_WRAP_SPAN+'">';
+          return $elm.wrap(tmpl).parent();
+        },
+        _wrapAdaptive = function ($elm) {
+          // Plugin with adaptive width prefers the "blocky" wrapping element
+          var tmpl = '<div class="'+CLASS_WRAP+'">';
           return $elm.wrap(tmpl).parent();
         },
         _isWrapped = function ($elm) {
-          return $elm.parent().hasClass(CLASS_WRAP_SPAN);
+          return $elm.parent().hasClass(CLASS_WRAP);
         },
         _unwrap = function ($elm) {
           var $parent = $elm.parent();
@@ -534,6 +546,8 @@
     module.directive(dirName, [
              'ezfb',
     function (ezfb) {
+      var _withAdaptiveWidth = PLUGINS_WITH_ADAPTIVE_WIDTH.indexOf(dirName) >= 0;
+
       return {
         restrict: 'EC',
         require: '?^ezfbXfbml',
@@ -555,12 +569,15 @@
             });
             return watchList;
           }, function (v) {
+            var wrapFn;
+
             renderId++;
             if (!rendering) {
               rendering = true;
 
+              wrapFn = _withAdaptiveWidth ? _wrapAdaptive : _wrap;
               // Wrap the social plugin code for FB.XFBML.parse
-              ezfb.XFBML.parse(_wrap(iElm)[0], genOnRenderHandler(renderId));
+              ezfb.XFBML.parse(wrapFn(iElm)[0], genOnRenderHandler(renderId));
             }
             else {
               // Already rendering, do not wrap
