@@ -1,10 +1,15 @@
+## v1.3.0
+
+* Remove default `FB.init` version `v1.0`, since Facebook platform no longer supports `v1.0`
+* Add [Page plugin](https://developers.facebook.com/docs/plugins/page-plugin/) support ([#45](https://github.com/pc035860/angular-easyfb/pull/45))
+
 ## v1.2.1
 
 * Add API support: `Canvas.getPageInfo` ([#40](https://github.com/pc035860/angular-easyfb/pull/40))
 
 ## v1.2.0
 
-* Add [App Events for Canvas](https://developers.facebook.com/docs/canvas/appevents) support. [#39](https://github.com/pc035860/angular-easyfb/issues/39)
+* Add [App Events for Canvas](https://developers.facebook.com/docs/canvas/appevents) support. ([#39](https://github.com/pc035860/angular-easyfb/issues/39))
 
 ## v1.1.0
 
