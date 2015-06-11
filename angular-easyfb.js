@@ -88,9 +88,6 @@
       status     : true, // check the login status upon init?
       cookie     : true, // set sessions cookies to allow your server to access the session?
       xfbml      : true,  // parse XFBML tags on this page?
-
-      // version information: https://developers.facebook.com/docs/apps/changelog/
-      version    : 'v1.0'
     };
     
     /**

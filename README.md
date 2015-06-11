@@ -2,10 +2,6 @@
 
 AngularJS + Facebook JavaScript SDK.
 
-**Since v1.1.0, `angular-easyfb` adds support for [Facebook Platform versioning](https://developers.facebook.com/docs/apps/changelog/).**
-
-**Please check out [the new FB JS SDK setup doc](https://developers.facebook.com/docs/javascript/quickstart/v2.0#loading) if you want to switch platform versions (module default is `v1.0`).**
-
 #### Features
 
 * Full [Facebook JavaScript SDK](https://developers.facebook.com/docs/reference/javascript/) support
@@ -69,12 +65,7 @@ angular.module('myApp')
 .config(function (ezfbProvider) {
   ezfbProvider.setInitParams({
     // This is my FB app id for plunker demo app
-    appId: '386469651480295',
-
-    // Module default is `v1.0`.
-    // If you want to use Facebook platform `v2.0`, you'll have to add the following parameter.
-    // https://developers.facebook.com/docs/javascript/reference/FB.init/v2.0
-    version: 'v2.0'
+    appId: '386469651480295'
   });  
 });
 ```
