@@ -16,11 +16,12 @@ describe('social plugin directive', function () {
         'fb:recommendations':     ['site', 'app_id'],
         'fb:recommendations-bar': ['href', 'site'],
         'fb:like-box':            ['href', 'show_faces'],
-        'fb:facepile':            ['href', 'app_id']
+        'fb:facepile':            ['href', 'app_id'],
+        'fb:page':                ['href', 'show_facepile']
       },
       INTERESTED_ATTRS = [
         'href', 'kid_directed_site', 'layout', 'width', 
-        'site', 'show_faces', 'app_id'
+        'site', 'show_faces', 'app_id', 'show_facepile'
       ],
       PARSE_DELAY_BY = 100;
 

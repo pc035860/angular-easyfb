@@ -508,7 +508,7 @@
       'size', 'width'
     ],
     'fbPage': [
-      'href', 'ref', 'share', 'showFaces', 'width', 'height', 'hide_cover', 'show_facepile', 'show_posts'
+      'href', 'width', 'height', 'hideCover', 'showFacepile', 'showPosts'
     ]
   };
 
