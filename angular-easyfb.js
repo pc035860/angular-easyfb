@@ -207,9 +207,10 @@
       // $get //
       //////////
       $get: [
-               '$window', '$q', '$document', '$parse', '$rootScope', '$injector',
-      function ($window,   $q,   $document,   $parse,   $rootScope,   $injector) {
-        var _initReady, _ezfb, _savedListeners, _paramsReady, ezfbAsyncInit;
+               '$window', '$q', '$document', '$parse', '$rootScope', '$injector', '$timeout',
+      function ($window,   $q,   $document,   $parse,   $rootScope,   $injector,   $timeout) {
+        var _initReady, _initRenderReady, _ezfb, _savedListeners, 
+            _paramsReady, ezfbAsyncInit;
 
         _savedListeners = {};
 
@@ -220,6 +221,7 @@
         }
 
         _initReady = $q.defer();
+        _initRenderReady = $q.defer();
         
         /**
          * #fb-root check & create
@@ -231,10 +233,23 @@
         // Run load SDK function
         ezfbAsyncInit = function () {
           _paramsReady.promise.then(function() {
+            // console.log('params ready');
+
+            var onRender = function () {
+              // console.log('on render');
+              _ezfb.$$rendered = true;
+              $timeout(function () {
+                _initRenderReady.resolve();
+              });
+              _ezfb.Event.unsubscribe('xfbml.render', onRender);
+            };
+            _ezfb.Event.subscribe('xfbml.render', onRender);
+
             // Run init function
             $injector.invoke(_initFunction, null, {'ezfbInitParams': _initParams});
 
             _ezfb.$$ready = true;
+
             _initReady.resolve();
           });
         };
@@ -245,6 +260,19 @@
 
         _ezfb = {
           $$ready: false,
+          $$rendered: false,
+          $ready: function (fn) {
+            if (angular.isFunction(fn)) {
+              _initReady.promise.then(fn);
+            }
+            return _initReady.promise;
+          },
+          $rendered: function (fn) {
+            if (angular.isFunction(fn)) {
+              _initRenderReady.promise.then(fn);
+            }
+            return _initRenderReady.promise;
+          },
           init: function (params) {
             _config(_initParams, params);
             _paramsReady.resolve();
@@ -544,69 +572,81 @@
         };
     
     module.directive(dirName, [
-             'ezfb',
-    function (ezfb) {
+             'ezfb', '$q', '$document',
+    function (ezfb,   $q,   $document) {
       var _withAdaptiveWidth = PLUGINS_WITH_ADAPTIVE_WIDTH.indexOf(dirName) >= 0;
+
+      var _dirClassName = dirName.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 
       return {
         restrict: 'EC',
         require: '?^ezfbXfbml',
-        link: function postLink(scope, iElm, iAttrs, xfbmlCtrl) {
-          /**
-           * For backward compatibility, skip self rendering if contained by easyfb-xfbml directive
-           */
-          if (xfbmlCtrl) {
-            return;
-          }
+        compile: function (tElm, tAttrs) {
+          tElm.removeClass(_dirClassName);
 
-          var rendering = false,
-              renderId = 0;
-
-          scope.$watch(function () {
-            var watchList = [];
-            angular.forEach(availableAttrs, function (attrName) {
-              watchList.push(iAttrs[attrName]);
-            });
-            return watchList;
-          }, function (v) {
-            var wrapFn;
-
-            renderId++;
-            if (!rendering) {
-              rendering = true;
-
-              wrapFn = _withAdaptiveWidth ? _wrapAdaptive : _wrap;
-              // Wrap the social plugin code for FB.XFBML.parse
-              ezfb.XFBML.parse(wrapFn(iElm)[0], genOnRenderHandler(renderId));
+          return function postLink(scope, iElm, iAttrs, xfbmlCtrl) {
+            /**
+             * For backward compatibility, skip self rendering if contained by easyfb-xfbml directive
+             */
+            if (xfbmlCtrl) {
+              return;
             }
-            else {
-              // Already rendering, do not wrap
-              ezfb.XFBML.parse(iElm.parent()[0], genOnRenderHandler(renderId));
-            }
-          }, true);
 
-          // Unwrap on $destroy
-          iElm.bind('$destroy', function () {
-            if (_isWrapped(iElm)) {
-              _unwrap(iElm);
-            }
-          });
+            var rendering = false,
+                renderId = 0;
 
-          function genOnRenderHandler(id) {
-            return function () {
-              var onrenderExp;
+            ezfb.$rendered()
+            .then(function () {
+              iElm.addClass(_dirClassName);
 
-              if (rendering && id === renderId) {
-                onrenderExp = iAttrs.onrender;
-                if (onrenderExp) {
-                  scope.$eval(onrenderExp);
+              scope.$watch(function () {
+                var watchList = [];
+                angular.forEach(availableAttrs, function (attrName) {
+                  watchList.push(iAttrs[attrName]);
+                });
+                return watchList;
+              }, function (v) {
+                var wrapFn;
+
+                renderId++;
+                if (!rendering) {
+                  rendering = true;
+
+                  wrapFn = _withAdaptiveWidth ? _wrapAdaptive : _wrap;
+                  // Wrap the social plugin code for FB.XFBML.parse
+                  ezfb.XFBML.parse(wrapFn(iElm)[0], genOnRenderHandler(renderId));
                 }
+                else {
+                  // Already rendering, do not wrap
+                  ezfb.XFBML.parse(iElm.parent()[0], genOnRenderHandler(renderId));
+                }
+              }, true);
+            });
 
-                rendering = false;
+
+            // Unwrap on $destroy
+            iElm.bind('$destroy', function () {
+              if (_isWrapped(iElm)) {
                 _unwrap(iElm);
               }
-            };
-          }
+            });
+
+            function genOnRenderHandler(id) {
+              return function () {
+                var onrenderExp;
+
+                if (rendering && id === renderId) {
+                  onrenderExp = iAttrs.onrender;
+                  if (onrenderExp) {
+                    scope.$eval(onrenderExp);
+                  }
+
+                  rendering = false;
+                  _unwrap(iElm);
+                }
+              };
+            }
+          };
         }
       };
     }]);

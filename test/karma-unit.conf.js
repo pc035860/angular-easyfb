@@ -6,6 +6,7 @@ module.exports = function(config) {
 
       'angular-easyfb.js',
 
+      'test/pubsub.js',
       'test/helper.js',
       'test/unit/*.js'
     ],

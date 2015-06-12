@@ -46,7 +46,15 @@ function mockSDKApi(apiPath, value) {
 
     var mockFB = {
       // Still required to provide an `init` function
-      init: angular.noop
+      init: angular.noop,
+      Event: {
+        subscribe: function (name, handler) {
+          pubsub.sub(name, handler);
+        },
+        unsubscribe: function (name, handler) {
+          pubsub.unsub(name, handler);
+        }
+      }
     };
     if (__toString.call(apiPath) === '[object Object]' && !value) {
       // map mode

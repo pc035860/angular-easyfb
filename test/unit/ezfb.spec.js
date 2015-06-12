@@ -34,14 +34,8 @@ describe('ezfb', function () {
       loadSDKSpy = jasmine.createSpy('load sdk');
       initSpy = jasmine.createSpy('init');
 
-      module(function ($provide) {
-        $provide.decorator('$window', function ($delegate) {
-          $delegate.FB = {
-            init: initSpy
-          };
-          return $delegate;
-        });
-      });
+
+      mockSDKApi('init', initSpy);
     });
 
     function injectEzfb () {
@@ -303,7 +297,7 @@ describe('ezfb', function () {
             ezfb.init({
               appId: APP_ID
             });
-          }, DELAY)
+          }, DELAY);
 
           $timeout.flush();
 
@@ -629,88 +623,6 @@ describe('ezfb', function () {
       });
     });
 
-    var pubsub = (function () {
-      var _core = jqLite('<span>');
-
-      return {
-        pub: function (name) {
-          _core.triggerHandler(name);
-        },
-        sub: function (name, handler) {
-          _core.on(name, handler);
-        },
-        unsub: function (name, handler) {
-          if (!handler || typeof handler !== 'function') {
-            return;
-          }
-          _core.off(name, handler);
-        },
-        clear: function () {
-          _core.off();
-        }
-      };
-    }());
-
-    describe('pubsub service with jqLite', function () {
-      var EVENT_NAME = 'sweetjs';
-
-      var handlerSpy;
-
-      beforeEach(function () {
-        handlerSpy = jasmine.createSpy('pubsub sub handler');
-      });
-
-      afterEach(function () {
-        pubsub.clear();
-      });
-
-      it('should trigger handler', function () {
-        pubsub.sub(EVENT_NAME, handlerSpy);
-        pubsub.pub(EVENT_NAME);
-
-        expect(handlerSpy.callCount).toEqual(1);
-      });
-
-      it('should not trigger handler if sub after pub', function () {
-        pubsub.pub(EVENT_NAME);
-        pubsub.sub(EVENT_NAME, handlerSpy);
-
-        expect(handlerSpy.callCount).toEqual(0);
-      });
-
-      it('should not trigger handler after unsub', function () {
-        pubsub.sub(EVENT_NAME, handlerSpy);
-        pubsub.unsub(EVENT_NAME, handlerSpy);
-        pubsub.pub(EVENT_NAME);
-
-        expect(handlerSpy.callCount).toEqual(0);
-      });
-
-      it('should trigger handler if unsub with a different handler', function () {
-        pubsub.sub(EVENT_NAME, handlerSpy);
-        pubsub.unsub(EVENT_NAME, angular.noop);
-        pubsub.pub(EVENT_NAME);
-
-        expect(handlerSpy.callCount).toEqual(1);
-      });
-
-      it('should trigger handler if unsub without specifying handler', function () {
-        pubsub.sub(EVENT_NAME, handlerSpy);
-        pubsub.unsub(EVENT_NAME);
-        pubsub.pub(EVENT_NAME);
-
-        expect(handlerSpy.callCount).toEqual(1);
-      });
-
-      it('should not trigger handler after clear', function () {
-        pubsub.sub(EVENT_NAME, handlerSpy);
-        pubsub.clear();
-        pubsub.pub(EVENT_NAME);
-
-        expect(handlerSpy.callCount).toEqual(0);
-      });
-    });
-
     describe('.Event', function () {
       /**
        * Ref:
@@ -757,10 +669,20 @@ describe('ezfb', function () {
 
       describe('.subscribe', function () {
         it('should call FB.Event.subscribe', function () {
-          ezfb.Event.subscribe(EVENT_NAME);
-          $rootScope.$apply();
+          inject(function ($timeout) {
+            ezfb.$rendered()
+            .then(function () {
+              ezfb.Event.subscribe(EVENT_NAME);
+            });
 
-          expect(subSpy.callCount).toEqual(1);
+            $rootScope.$apply();
+
+            // Fake SDK init auto parse
+            pubsub.pub('xfbml.render');
+            $timeout.flush();
+
+            expect(subSpy.mostRecentCall.args[0]).toEqual(EVENT_NAME);
+          });
         });
 
         it('should trigger handler on event takes place', function () {
