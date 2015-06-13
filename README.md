@@ -1,4 +1,4 @@
-# angular-easyfb v1.3.0 [![Build Status](https://travis-ci.org/pc035860/angular-easyfb.svg?branch=master)](https://travis-ci.org/pc035860/angular-easyfb)
+# angular-easyfb v1.3.1 [![Build Status](https://travis-ci.org/pc035860/angular-easyfb.svg?branch=master)](https://travis-ci.org/pc035860/angular-easyfb)
 
 AngularJS + Facebook JavaScript SDK.
 
@@ -11,9 +11,8 @@ AngularJS + Facebook JavaScript SDK.
 * Full [Facebook JavaScript SDK](https://developers.facebook.com/docs/reference/javascript/) support
 * Seamless FB SDK initialization (asynchronously load script and FB.init)
 * All SDK API callbacks are automatically applied with AngularJS context
-* Bundled a handy directive for parsing Facebook XFBML plugins dynamically (deprecated since v0.3.0)
 * Support both callback and $q promise
-* Provide built-in directive support for Facebook XFBML plugins (v0.3.0)
+* Provide built-in directive support for Facebook XFBML plugins
 
 #### Demos
 
