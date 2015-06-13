@@ -537,6 +537,9 @@
     ],
     'fbPage': [
       'href', 'width', 'height', 'hideCover', 'showFacepile', 'showPosts'
+    ],
+    'fbVideo': [
+      'href', 'width', 'allowfullscreen'
     ]
   };
 
