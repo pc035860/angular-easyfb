@@ -1,3 +1,8 @@
+## v1.3.1
+
+* Refine social plugin directives parsing process for plugins with adaptive width (`fb-page` for now) ([#45](https://github.com/pc035860/angular-easyfb/pull/45))
+* Add [Embedded Video Player](https://developers.facebook.com/docs/plugins/embedded-video-player/) support
+
 ## v1.3.0
 
 * Change default `FB.init` version from `v1.0` to `v2.0`
