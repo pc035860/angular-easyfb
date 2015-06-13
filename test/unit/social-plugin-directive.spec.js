@@ -228,7 +228,7 @@ describe('social plugin directive', function () {
         beforeEach(function () {
           // Simulate init xfbml parsing
           $timeout(function () {
-            pubsub.pub('xfbml.render');
+            mockXFBMLrendered();
           }, HELLO_RENDER_DELAY);
         });
 

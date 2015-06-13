@@ -206,6 +206,97 @@ describe('ezfb', function () {
       });
     });
 
+    describe('"$" methods', function () {
+
+      var ezfb, $rootScope;
+
+      beforeEach(function () {
+        mockSDKApi();
+
+        inject(function (_ezfb_, _$rootScope_) {
+          ezfb = _ezfb_;
+          $rootScope = _$rootScope_;
+        });
+      });
+
+      describe('.$ready', function () {
+        it('callback should run when FB instance is ready', function () {
+          ezfb.$ready(fbMockCallbackSpy);
+
+          ezfb.init({
+            appId: APP_ID
+          });
+
+          expect(fbMockCallbackSpy.callCount).toEqual(0);
+
+          $rootScope.$apply();
+
+          expect(fbMockCallbackSpy.callCount).toEqual(1);
+        });
+
+        it('promise should be resolved when FB instance is ready', function () {
+          ezfb.$ready().then(fbMockPromiseSpy);
+
+          ezfb.init({
+            appId: APP_ID
+          });
+
+          expect(fbMockPromiseSpy.callCount).toEqual(0);
+
+          $rootScope.$apply();
+
+          expect(fbMockPromiseSpy.callCount).toEqual(1);
+        });
+      });
+
+      describe('.$rendered', function () {
+        var $timeout;
+
+        beforeEach(inject(function (_$timeout_) {
+          $timeout = _$timeout_;
+        }));
+
+        it('callback should run when auto XFBML parsing is done', function () {
+          ezfb.$rendered(fbMockCallbackSpy);
+
+          ezfb.init({
+            appId: APP_ID
+          });
+
+          $timeout(function () {
+            mockXFBMLrendered();
+          }, 100);
+
+          expect(fbMockCallbackSpy.callCount).toEqual(0);
+
+          // $rootScope.$apply();
+          $timeout.flush(100);
+
+          expect(fbMockCallbackSpy.callCount).toEqual(1);
+        });
+
+        it('promise should be resolved when auto XFBML parsing is done', function () {
+          ezfb.$rendered().then(fbMockPromiseSpy);
+
+          ezfb.init({
+            appId: APP_ID
+          });
+
+          $timeout(function () {
+            mockXFBMLrendered();
+          }, 100);
+
+          expect(fbMockPromiseSpy.callCount).toEqual(0);
+
+          // $rootScope.$apply();
+          $timeout.flush(100);
+
+          expect(fbMockPromiseSpy.callCount).toEqual(1);
+        });
+      });
+
+    });
+
     describe('.init', function () {
       /**
        * Ref: https://developers.facebook.com/docs/javascript/reference/FB.init
@@ -226,7 +317,7 @@ describe('ezfb', function () {
         });
       });
 
-      it('should call FB.init with correct parameters and set ezfb.$$ready to `true`', function () {
+      it('should call FB.init with correct parameters', function () {
         ezfb.init({
           appId: APP_ID
         });
@@ -239,9 +330,7 @@ describe('ezfb', function () {
             appId: APP_ID
           })
         );
-        expect(ezfb.$$ready).toBeTruthy();
       });
-
     });
 
     describe('.api', function () {
@@ -677,8 +766,7 @@ describe('ezfb', function () {
 
             $rootScope.$apply();
 
-            // Fake SDK init auto parse
-            pubsub.pub('xfbml.render');
+            mockXFBMLrendered();
             $timeout.flush();
 
             expect(subSpy.mostRecentCall.args[0]).toEqual(EVENT_NAME);

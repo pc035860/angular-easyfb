@@ -9,6 +9,13 @@ function mockSDKLoader(ezfbAsyncInit) {
 }
 
 /**
+ * Trigger 'xfbml.render' event manually with `pubsub`
+ */
+function mockXFBMLrendered () {
+  pubsub.pub('xfbml.render');
+}
+
+/**
  * Decorate $window for mocking FB JS SDK, with given api path and method.
  * May accept string/array as api path. Also support object input.
  * 
