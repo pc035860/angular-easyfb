@@ -25,7 +25,7 @@ AngularJS + Facebook JavaScript SDK.
 
 Include the angular-easyfb module with AngularJS script in your page.
 ```html
-<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
 <script src="http://pc035860.github.io/angular-easyfb/angular-easyfb.min.js"></script>
 ```
 
