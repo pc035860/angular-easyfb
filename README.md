@@ -240,7 +240,7 @@ Additionally, you can add an `onrender` parameter to the social plugin directive
   data-share="true"></div>
 ```
 
-[Demo (directives demostration)](http://plnkr.co/edit/1c5cWB?p=preview)
+[Demo (directives demonstration)](http://plnkr.co/edit/1c5cWB?p=preview)
 
 [Demo2 (interpolated attributes)](http://plnkr.co/edit/gFM1LV?p=preview)
 
