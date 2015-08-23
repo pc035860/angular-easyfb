@@ -551,7 +551,7 @@
 
     // Adpative width plugins
     // e.g. https://developers.facebook.com/docs/plugins/page-plugin#adaptive-width
-    var PLUGINS_WITH_ADAPTIVE_WIDTH = ['fbPage'];
+    var PLUGINS_WITH_ADAPTIVE_WIDTH = ['fbPage', 'fbComments'];
     
     /**
      * Wrap-related functions
