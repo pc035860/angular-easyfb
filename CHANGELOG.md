@@ -1,3 +1,7 @@
+## v1.3.2
+
+* Support `100%` literal of `width` setting of [Comments](https://developers.facebook.com/docs/plugins/comments). ([#53](https://github.com/pc035860/angular-easyfb/issues/53))
+
 ## v1.3.1
 
 * Refine social plugin directives parsing process for plugins with adaptive width (`fb-page` for now) ([#45](https://github.com/pc035860/angular-easyfb/pull/45))
