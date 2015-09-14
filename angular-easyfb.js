@@ -540,6 +540,9 @@
     ],
     'fbVideo': [
       'href', 'width', 'allowfullscreen'
+    ],
+    'fbAdPreview': [
+      'creative', 'adFormat'
     ]
   };
 
