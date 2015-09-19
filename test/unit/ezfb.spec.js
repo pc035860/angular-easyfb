@@ -9,7 +9,7 @@ describe('ezfb', function () {
         status     : true,
         cookie     : true,
         xfbml      : true,
-        version    : 'v2.0'
+        version    : 'v2.4'
       };
 
   var jqLite = angular.element;
