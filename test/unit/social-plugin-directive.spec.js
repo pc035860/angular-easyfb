@@ -18,11 +18,13 @@ describe('social plugin directive', function () {
         'fb:like-box':            ['href', 'show_faces'],
         'fb:facepile':            ['href', 'app_id'],
         'fb:page':                ['href', 'show_facepile'],
-        'fb:video':               ['href', 'width']
+        'fb:video':               ['href', 'width'],
+        'fb:ad-preview':          ['creative', 'ad_format']
       },
       INTERESTED_ATTRS = [
         'href', 'kid_directed_site', 'layout', 'width', 
-        'site', 'show_faces', 'app_id', 'show_facepile'
+        'site', 'show_faces', 'app_id', 'show_facepile',
+        'creative', 'ad_format'
       ],
       HELLO_RENDER_DELAY = 20,
       PARSE_DELAY_BY = 100;
@@ -80,6 +82,7 @@ describe('social plugin directive', function () {
             obj[attrName] = val;
           }
         });
+        // log attr values for tests
         $log.debug(obj);
       };
       return $delegate;
@@ -295,7 +298,7 @@ describe('social plugin directive', function () {
 
         it('should call ezfb.XFBML.parse with interpolated attribute', function () {
           var attrs = {}, lastAttrs;
-          attrs[attrNames[0]] = '{{ v0 }}';
+          attrs[attrNames[0]] = '{{v0}}';
           $scope.v0 = attrNames[0];
 
           compileDir(getTemplate(dirTag, attrs));
@@ -315,7 +318,7 @@ describe('social plugin directive', function () {
 
           var attrs = {}, lastAttrs;
 
-          attrs[attrNames[0]] = '{{ v0 }}';
+          attrs[attrNames[0]] = '{{v0}}';
 
           $timeout(function () {
             $scope.v0 = makeValue(attrNames[0]);
@@ -347,8 +350,8 @@ describe('social plugin directive', function () {
 
           var attrs = {}, lastAttrs, callElm;
 
-          attrs[attrNames[0]] = '{{ v0 }}';
-          attrs[attrNames[1]] = '{{ v1 }}';
+          attrs[attrNames[0]] = '{{v0}}';
+          attrs[attrNames[1]] = '{{v1}}';
 
           $timeout(function () {
             $scope.v0 = makeValue(attrNames[0]);
