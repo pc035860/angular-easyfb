@@ -90,7 +90,7 @@
       xfbml      : true,  // parse XFBML tags on this page?
 
       // version information: https://developers.facebook.com/docs/apps/changelog/
-      version    : 'v2.0'
+      version    : 'v2.4'
     };
     
     /**
@@ -540,6 +540,9 @@
     ],
     'fbVideo': [
       'href', 'width', 'allowfullscreen'
+    ],
+    'fbAdPreview': [
+      'adAccountId', 'adgroupId', 'creative', 'creativeId', 'adFormat', 'pageType', 'targeting', 'post'
     ]
   };
 
