@@ -4,7 +4,7 @@ module.exports = function(config) {
       'bower_components/angular/angular.js',
       'bower_components/angular-mocks/angular-mocks.js',
 
-      'angular-easyfb.js',
+      'src/angular-easyfb.js',
 
       'test/pubsub.js',
       'test/helper.js',
