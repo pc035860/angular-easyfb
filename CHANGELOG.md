@@ -1,3 +1,8 @@
+## v1.4.0
+
+* Add [Ad Preview Plugin](https://developers.facebook.com/docs/marketing-api/ad-preview-plugin/v2.4) support
+* In order to support _Ad Preview Plugin_, default platform version is now `2.4`
+
 ## v1.3.2
 
 * Support `100%` literal of `width` setting of [Comments](https://developers.facebook.com/docs/plugins/comments). ([#53](https://github.com/pc035860/angular-easyfb/issues/53))
