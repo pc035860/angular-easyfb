@@ -542,7 +542,7 @@
       'href', 'width', 'allowfullscreen'
     ],
     'fbAdPreview': [
-      'creative', 'adFormat'
+      'adAccountId', 'adgroupId', 'creative', 'creativeId', 'adFormat', 'pageType', 'targeting', 'post'
     ]
   };
 
