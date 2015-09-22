@@ -1,3 +1,7 @@
+## v1.4.1
+
+* Update `main` configuration of `bower.json`
+
 ## v1.4.0
 
 * Add [Ad Preview Plugin](https://developers.facebook.com/docs/marketing-api/ad-preview-plugin/v2.4) support
