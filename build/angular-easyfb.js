@@ -1,6 +1,6 @@
 /*! angular-easyfb
-version: 1.4.0
-build date: 2015-09-20
+version: 1.4.1
+build date: 2015-09-22
 author: Robin Fan
 https://github.com/pc035860/angular-easyfb.git */
 (function(module) {
