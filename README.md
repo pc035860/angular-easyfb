@@ -34,6 +34,12 @@ Add `ezfb` to your app module's dependency.
 angular.module('myApp', ['ezfb']);
 ```
 
+### Install with npm
+
+```sh
+npm install angular-easyfb
+```
+
 ### Install with Bower
 
 ```sh
