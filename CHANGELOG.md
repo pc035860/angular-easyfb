@@ -1,3 +1,7 @@
+## v1.4.2
+
+* Update `main` configuration of `package.json`
+
 ## v1.4.1
 
 * Update `main` configuration of `bower.json`
