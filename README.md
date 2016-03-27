@@ -1,8 +1,8 @@
-# angular-easyfb v1.4.1 [![Build Status](https://travis-ci.org/pc035860/angular-easyfb.svg?branch=master)](https://travis-ci.org/pc035860/angular-easyfb)
+# angular-easyfb [![Build Status](https://travis-ci.org/pc035860/angular-easyfb.svg?branch=master)](https://travis-ci.org/pc035860/angular-easyfb)
 
 AngularJS + Facebook JavaScript SDK.
 
-**Since v1.1.0, `angular-easyfb` adds support for [Facebook Platform versioning](https://developers.facebook.com/docs/apps/changelog/).**
+**Start from v1.1.0, `angular-easyfb` adds support for [Facebook Platform versioning](https://developers.facebook.com/docs/apps/changelog/).**
 
 **Please check out [the new FB JS SDK setup doc](https://developers.facebook.com/docs/javascript/quickstart#loading) if you want to switch platform versions (module default is `v2.4`).**
 
