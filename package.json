@@ -2,7 +2,7 @@
   "name": "angular-easyfb",
   "version": "1.4.1",
   "description": "Super easy AngularJS + Facebook JavaScript SDK.",
-  "main": "index.js",
+  "main": "build/angular-easyfb.js",
   "directories": {},
   "scripts": {
     "test": "grunt test"
