@@ -7,7 +7,7 @@ module.exports = function(grunt) {
         curly: true,
         jshintrc: '.jshintrc'
       },
-      beforeuglify: ['<%= pkg.name %>.js'],
+      beforeuglify: ['src/<%= pkg.name %>.js'],
       gruntfile: ['Gruntfile.js']
     },
     uglify: {
