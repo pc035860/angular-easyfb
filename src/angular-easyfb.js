@@ -101,16 +101,19 @@
      *   ezfbLocale    - configured SDK locale
      */
     var _defaultLoadSDKFunction = [
-                   '$window', '$document', 'ezfbAsyncInit', 'ezfbLocale',
-          function ($window,   $document,   ezfbAsyncInit,   ezfbLocale) {
+                   '$window', '$document', '$timeout', 'ezfbAsyncInit', 'ezfbLocale',
+          function ($window,   $document,   $timeout,   ezfbAsyncInit,   ezfbLocale) {
             // Load the SDK's source Asynchronously
             (function(d){
-              var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
-              if (d.getElementById(id)) {return;}
-              js = d.createElement('script'); js.id = id; js.async = true;
-              js.src = "//connect.facebook.net/" + ezfbLocale + "/sdk.js";
-              // js.src = "//connect.facebook.net/" + ezfbLocale + "/sdk/debug.js";  // debug
-              ref.parentNode.insertBefore(js, ref);
+              var insertScript = function() {
+                var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+                if (d.getElementById(id)) {return;}
+                js = d.createElement('script'); js.id = id; js.async = true;
+                js.src = "//connect.facebook.net/" + ezfbLocale + "/sdk.js";
+                // js.src = "//connect.facebook.net/" + ezfbLocale + "/sdk/debug.js";  // debug
+                ref.parentNode.insertBefore(js, ref);
+              };
+              $timeout(insertScript, 0, false);
             }($document[0]));
 
             $window.fbAsyncInit = ezfbAsyncInit;
