@@ -1,4 +1,4 @@
-# angular-easyfb [![Build Status](https://travis-ci.org/pc035860/angular-easyfb.svg?branch=master)](https://travis-ci.org/pc035860/angular-easyfb)
+# angular-easyfb [![Build Status](https://travis-ci.org/pc035860/angular-easyfb.svg?branch=master)](https://travis-ci.org/pc035860/angular-easyfb) [![npm](https://img.shields.io/npm/v/angular-easyfb.svg)]() [![Bower](https://img.shields.io/bower/v/angular-easyfb.svg)]()
 
 AngularJS + Facebook JavaScript SDK.
 
