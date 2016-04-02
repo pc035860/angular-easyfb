@@ -272,7 +272,7 @@ describe('ezfb', function () {
           // $rootScope.$apply();
           $timeout.flush(100);
 
-          expect(fbMockCallbackSpy.callCount).toEqual(1);
+          expect(fbMockCallbackSpy).toHaveBeenCalledWith(true);
         });
 
         it('promise should be resolved when auto XFBML parsing is done', function () {
@@ -291,7 +291,37 @@ describe('ezfb', function () {
           // $rootScope.$apply();
           $timeout.flush(100);
 
-          expect(fbMockPromiseSpy.callCount).toEqual(1);
+          expect(fbMockPromiseSpy).toHaveBeenCalledWith(true);
+        });
+
+        it('callback should be called with `false` on parameter `xfbml: false`', function () {
+          ezfb.$rendered(fbMockCallbackSpy);
+
+          ezfb.init({
+            appId: APP_ID,
+            xfbml: false
+          });
+
+          expect(fbMockCallbackSpy.callCount).toEqual(0);
+
+          $timeout.flush();
+
+          expect(fbMockCallbackSpy).toHaveBeenCalledWith(false);
+        });
+
+        it('promise should be resolved with `false` on parameter `xfbml: false`', function () {
+          ezfb.$rendered().then(fbMockPromiseSpy);
+
+          ezfb.init({
+            appId: APP_ID,
+            xfbml: false
+          });
+
+          expect(fbMockPromiseSpy.callCount).toEqual(0);
+
+          $timeout.flush();
+
+          expect(fbMockPromiseSpy).toHaveBeenCalledWith(false);
         });
       });
 
