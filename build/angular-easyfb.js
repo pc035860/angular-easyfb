@@ -144,14 +144,20 @@ https://github.com/pc035860/angular-easyfb.git */
                 }
                 ezfbAsyncInit = function() {
                     _paramsReady.promise.then(function() {
-                        var onRender = function() {
-                            _ezfb.$$rendered = true;
+                        if (_initParams.xfbml) {
+                            var onRender = function() {
+                                _ezfb.$$xfbmlRendered = true;
+                                $timeout(function() {
+                                    _initRenderReady.resolve(true);
+                                });
+                                _ezfb.Event.unsubscribe("xfbml.render", onRender);
+                            };
+                            _ezfb.Event.subscribe("xfbml.render", onRender);
+                        } else {
                             $timeout(function() {
-                                _initRenderReady.resolve();
+                                _initRenderReady.resolve(false);
                             });
-                            _ezfb.Event.unsubscribe("xfbml.render", onRender);
-                        };
-                        _ezfb.Event.subscribe("xfbml.render", onRender);
+                        }
                         $injector.invoke(_initFunction, null, {
                             ezfbInitParams: _initParams
                         });
@@ -165,7 +171,7 @@ https://github.com/pc035860/angular-easyfb.git */
                 });
                 _ezfb = {
                     $$ready: false,
-                    $$rendered: false,
+                    $$xfbmlRendered: false,
                     $ready: function(fn) {
                         if (angular.isFunction(fn)) {
                             _initReady.promise.then(fn);

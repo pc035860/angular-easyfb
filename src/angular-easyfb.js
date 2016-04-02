@@ -238,15 +238,26 @@
           _paramsReady.promise.then(function() {
             // console.log('params ready');
 
-            var onRender = function () {
-              // console.log('on render');
-              _ezfb.$$rendered = true;
+            if (_initParams.xfbml) {
+              // with first-time xfbml parsing parameter
+              
+              var onRender = function () {
+                // console.log('on render');
+                _ezfb.$$xfbmlRendered = true;
+                $timeout(function () {
+                  _initRenderReady.resolve(true);
+                });
+                _ezfb.Event.unsubscribe('xfbml.render', onRender);
+              };
+              _ezfb.Event.subscribe('xfbml.render', onRender);
+            }
+            else {
+              // without first-time xfbml parsing parameter
+
               $timeout(function () {
-                _initRenderReady.resolve();
+                _initRenderReady.resolve(false);
               });
-              _ezfb.Event.unsubscribe('xfbml.render', onRender);
-            };
-            _ezfb.Event.subscribe('xfbml.render', onRender);
+            }
 
             // Run init function
             $injector.invoke(_initFunction, null, {'ezfbInitParams': _initParams});
@@ -263,23 +274,30 @@
 
         _ezfb = {
           $$ready: false,
-          $$rendered: false,
+          $$xfbmlRendered: false,
+
+          // fbsdk init ready
           $ready: function (fn) {
             if (angular.isFunction(fn)) {
               _initReady.promise.then(fn);
             }
             return _initReady.promise;
           },
+
+          // intended for first xfbml parse ready if `xfbml: true` is presented
+          // still gets resolved if `xfbml: false`, but resolved value would be `false`
           $rendered: function (fn) {
             if (angular.isFunction(fn)) {
               _initRenderReady.promise.then(fn);
             }
             return _initRenderReady.promise;
           },
+
           init: function (params) {
             _config(_initParams, params);
             _paramsReady.resolve();
           },
+
           AppEvents: {
             EventNames: APP_EVENTS_EVENT_NAMES,
             ParameterNames: APP_EVENTS_PARAMETER_NAMES
