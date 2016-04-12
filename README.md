@@ -1,4 +1,4 @@
-# angular-easyfb [![Build Status](https://travis-ci.org/pc035860/angular-easyfb.svg?branch=master)](https://travis-ci.org/pc035860/angular-easyfb) [![npm](https://img.shields.io/npm/v/angular-easyfb.svg)](https://www.npmjs.com/package/angular-easyfb) [![Bower](https://img.shields.io/bower/v/angular-easyfb.svg)](http://bower.io/search/?q=angular-easyfb)
+# angular-easyfb [![Build Status](https://travis-ci.org/pc035860/angular-easyfb.svg?branch=master)](https://travis-ci.org/pc035860/angular-easyfb) [![npm](https://img.shields.io/npm/v/angular-easyfb.svg)](https://www.npmjs.com/package/angular-easyfb) [![Bower](https://img.shields.io/bower/v/angular-easyfb.svg)](http://bower.io/search/?q=angular-easyfb) [![Gitter](https://badges.gitter.im/pc035860/angular-easyfb.svg)](https://gitter.im/pc035860/angular-easyfb?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 AngularJS + Facebook JavaScript SDK.
 
