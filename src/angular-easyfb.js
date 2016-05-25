@@ -564,6 +564,12 @@
     ],
     'fbAdPreview': [
       'adAccountId', 'adgroupId', 'creative', 'creativeId', 'adFormat', 'pageType', 'targeting', 'post'
+    ],
+    'fbSendToMessenger': [
+      'messengerAppId', 'pageId', 'ref', 'color', 'size'
+    ],
+    'fbMessengermessageus': [
+      'messengerAppId', 'pageId', 'color', 'size'
     ]
   };
 
