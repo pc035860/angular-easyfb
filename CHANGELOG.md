@@ -1,3 +1,7 @@
+## v1.5.1
+
+* Bump bower version
+
 ## v1.5.0
 
 * Add [Send-to-Messenger Plugin](https://developers.facebook.com/docs/messenger-platform/plugin-reference#send_to_messenger) and [Message-Us Plugin](https://developers.facebook.com/docs/messenger-platform/plugin-reference#message_us)
