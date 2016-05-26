@@ -90,7 +90,7 @@
       xfbml      : true,  // parse XFBML tags on this page?
 
       // version information: https://developers.facebook.com/docs/apps/changelog/
-      version    : 'v2.4'
+      version    : 'v2.6'
     };
     
     /**
@@ -564,6 +564,12 @@
     ],
     'fbAdPreview': [
       'adAccountId', 'adgroupId', 'creative', 'creativeId', 'adFormat', 'pageType', 'targeting', 'post'
+    ],
+    'fbSendToMessenger': [
+      'messengerAppId', 'pageId', 'ref', 'color', 'size'
+    ],
+    'fbMessengermessageus': [
+      'messengerAppId', 'pageId', 'color', 'size'
     ]
   };
 
