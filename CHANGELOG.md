@@ -1,3 +1,8 @@
+## v1.5.0
+
+* Add [Send-to-Messenger Plugin](https://developers.facebook.com/docs/messenger-platform/plugin-reference#send_to_messenger) and [Message-Us Plugin](https://developers.facebook.com/docs/messenger-platform/plugin-reference#message_us)
+* Change default FB JS SDK platform version to `v2.6`
+
 ## v1.4.4
 
 * Fix intialization error when `xfbml: false` parameter is given ([#66](https://github.com/pc035860/angular-easyfb/issues/66))
