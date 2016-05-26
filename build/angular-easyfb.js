@@ -1,6 +1,6 @@
 /*! angular-easyfb
 version: 1.4.4
-build date: 2016-05-25
+build date: 2016-05-26
 author: Robin Fan
 https://github.com/pc035860/angular-easyfb.git */
 (function(module) {
@@ -63,7 +63,7 @@ https://github.com/pc035860/angular-easyfb.git */
             status: true,
             cookie: true,
             xfbml: true,
-            version: "v2.4"
+            version: "v2.6"
         };
         var _defaultLoadSDKFunction = [ "$window", "$document", "$timeout", "ezfbAsyncInit", "ezfbLocale", function($window, $document, $timeout, ezfbAsyncInit, ezfbLocale) {
             (function(d) {
