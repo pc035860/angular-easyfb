@@ -22,13 +22,15 @@ describe('social plugin directive', function () {
         'fb:ad-preview':          ['creative', 'ad_format'],
         'fb:send-to-messenger':   ['messenger_app_id', 'page_id'],
         'fb:messengermessageus':  ['messenger_app_id', 'page_id'],
-        'fb:login-button':        ['scope', 'size']
+        'fb:login-button':        ['scope', 'size'],
+        'fb:comment-embed':       ['href', 'width'],
+        'fb:save':                ['uri']
       },
       INTERESTED_ATTRS = [
         'href', 'kid_directed_site', 'layout', 'width', 
         'site', 'show_faces', 'app_id', 'show_facepile',
         'creative', 'ad_format', 'messenger_app_id', 'page_id',
-        'scope', 'size'
+        'scope', 'size', 'uri'
       ],
       HELLO_RENDER_DELAY = 20,
       PARSE_DELAY_BY = 100;

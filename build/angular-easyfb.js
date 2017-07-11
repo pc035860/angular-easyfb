@@ -329,7 +329,9 @@ https://github.com/pc035860/angular-easyfb.git */
         fbAdPreview: [ "adAccountId", "adgroupId", "creative", "creativeId", "adFormat", "pageType", "targeting", "post" ],
         fbSendToMessenger: [ "messengerAppId", "pageId", "ref", "color", "size" ],
         fbMessengermessageus: [ "messengerAppId", "pageId", "color", "size" ],
-        fbLoginButton: [ "autoLogoutLink", "maxRows", "onLogin", "scope", "size", "showFaces", "defaultAudience" ]
+        fbLoginButton: [ "autoLogoutLink", "maxRows", "onLogin", "scope", "size", "showFaces", "defaultAudience" ],
+        fbCommentEmbed: [ "href", "width", "includeParent" ],
+        fbSave: [ "uri" ]
     };
     angular.forEach(_socialPluginDirectiveConfig, creatSocialPluginDirective);
     function creatSocialPluginDirective(availableAttrs, dirName) {

@@ -573,6 +573,12 @@
     ],
     'fbLoginButton': [
       'autoLogoutLink', 'maxRows', 'onLogin', 'scope', 'size', 'showFaces', 'defaultAudience'
+    ],
+    'fbCommentEmbed': [
+      'href', 'width', 'includeParent'
+    ],
+    'fbSave': [
+      'uri'
     ]
   };
 
