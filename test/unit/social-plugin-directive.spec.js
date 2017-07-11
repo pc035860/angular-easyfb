@@ -21,12 +21,14 @@ describe('social plugin directive', function () {
         'fb:video':               ['href', 'width'],
         'fb:ad-preview':          ['creative', 'ad_format'],
         'fb:send-to-messenger':   ['messenger_app_id', 'page_id'],
-        'fb:messengermessageus':   ['messenger_app_id', 'page_id']
+        'fb:messengermessageus':  ['messenger_app_id', 'page_id'],
+        'fb:login-button':        ['scope', 'size']
       },
       INTERESTED_ATTRS = [
         'href', 'kid_directed_site', 'layout', 'width', 
         'site', 'show_faces', 'app_id', 'show_facepile',
-        'creative', 'ad_format', 'messenger_app_id', 'page_id'
+        'creative', 'ad_format', 'messenger_app_id', 'page_id',
+        'scope', 'size'
       ],
       HELLO_RENDER_DELAY = 20,
       PARSE_DELAY_BY = 100;

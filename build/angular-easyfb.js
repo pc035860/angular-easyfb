@@ -1,6 +1,6 @@
 /*! angular-easyfb
 version: 1.5.1
-build date: 2016-05-27
+build date: 2017-07-12
 author: Robin Fan
 https://github.com/pc035860/angular-easyfb.git */
 (function(module) {
@@ -328,7 +328,8 @@ https://github.com/pc035860/angular-easyfb.git */
         fbVideo: [ "href", "width", "allowfullscreen" ],
         fbAdPreview: [ "adAccountId", "adgroupId", "creative", "creativeId", "adFormat", "pageType", "targeting", "post" ],
         fbSendToMessenger: [ "messengerAppId", "pageId", "ref", "color", "size" ],
-        fbMessengermessageus: [ "messengerAppId", "pageId", "color", "size" ]
+        fbMessengermessageus: [ "messengerAppId", "pageId", "color", "size" ],
+        fbLoginButton: [ "autoLogoutLink", "maxRows", "onLogin", "scope", "size", "showFaces", "defaultAudience" ]
     };
     angular.forEach(_socialPluginDirectiveConfig, creatSocialPluginDirective);
     function creatSocialPluginDirective(availableAttrs, dirName) {
