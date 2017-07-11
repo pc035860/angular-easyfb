@@ -570,6 +570,9 @@
     ],
     'fbMessengermessageus': [
       'messengerAppId', 'pageId', 'color', 'size'
+    ],
+    'fbLoginButton': [
+      'autoLogoutLink', 'maxRows', 'onLogin', 'scope', 'size', 'showFaces', 'defaultAudience'
     ]
   };
 

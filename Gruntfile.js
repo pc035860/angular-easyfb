@@ -5,7 +5,8 @@ module.exports = function(grunt) {
     jshint: {
       options: {
         curly: true,
-        jshintrc: '.jshintrc'
+        jshintrc: '.jshintrc',
+        reporterOutput: ''
       },
       beforeuglify: ['src/<%= pkg.name %>.js'],
       gruntfile: ['Gruntfile.js']
