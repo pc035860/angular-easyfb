@@ -33,7 +33,7 @@ describe('social plugin directive', function () {
 
   var jqLite = angular.element;
 
-  var xfbmlParseSpy, onrenderSpy;
+  var xfbmlParseSpy, onrenderSpy, xfbmlParseSpyExtra;
 
   var $scope, element, $rootScope;
 
@@ -42,6 +42,7 @@ describe('social plugin directive', function () {
   beforeEach(function () {
     xfbmlParseSpy = jasmine.createSpy('FB.XFBML.parse call');
     onrenderSpy = jasmine.createSpy('directive onrender');
+    xfbmlParseSpyExtra = jasmine.createSpy('FB.XFBML.parse call extra info')
   });
 
   beforeEach(function () {
@@ -75,7 +76,9 @@ describe('social plugin directive', function () {
 
         callCount++;
 
+        var childTagName = jqLite(elm).children()[0].tagName;
         xfbmlParseSpy(elm, callback);
+        xfbmlParseSpyExtra(childTagName);
 
         var $elm = jqLite(elm), obj = {};
         angular.forEach(INTERESTED_ATTRS, function (attrName) {
@@ -350,7 +353,7 @@ describe('social plugin directive', function () {
           var INTERPOLATE_0 = 50,
               INTERPOLATE_1 = 250;
 
-          var attrs = {}, lastAttrs, callElm;
+          var attrs = {}, lastAttrs, callChildTagName;
 
           attrs[attrNames[0]] = '{{v0}}';
           attrs[attrNames[1]] = '{{v1}}';
@@ -373,8 +376,8 @@ describe('social plugin directive', function () {
           expect(lastAttrs[attrNames[1]]).toBeFalsy();
           expect(xfbmlParseSpy.callCount).toEqual(1);
           // Make sure there's no nesting of wrapper element
-          callElm = xfbmlParseSpy.mostRecentCall.args[0];
-          expect(jqLite(callElm).children()[0].tagName).toEqual(dirTag.toUpperCase());
+          callChildTagName = xfbmlParseSpyExtra.mostRecentCall.args[0];
+          expect(callChildTagName).toEqual(dirTag.toUpperCase());
 
           // attrNames[0] interpolated
           $timeout.flush(INTERPOLATE_0);  // at 50
@@ -387,8 +390,8 @@ describe('social plugin directive', function () {
           expect(lastAttrs[attrNames[1]]).toBeFalsy();
           expect(xfbmlParseSpy.callCount).toEqual(2);
           // Make sure there's no nesting of wrapper element
-          callElm = xfbmlParseSpy.mostRecentCall.args[0];
-          expect(jqLite(callElm).children()[0].tagName).toEqual(dirTag.toUpperCase());
+          callChildTagName = xfbmlParseSpyExtra.mostRecentCall.args[0];
+          expect(callChildTagName).toEqual(dirTag.toUpperCase());
 
           // Second call rendered
           makeItRendered(2);  // at 200
@@ -401,8 +404,8 @@ describe('social plugin directive', function () {
           expect(lastAttrs[attrNames[1]]).toEqual($scope.v1);
           expect(xfbmlParseSpy.callCount).toEqual(3);
           // Make sure there's no nesting of wrapper element
-          callElm = xfbmlParseSpy.mostRecentCall.args[0];
-          expect(jqLite(callElm).children()[0].tagName).toEqual(dirTag.toUpperCase());
+          callChildTagName = xfbmlParseSpyExtra.mostRecentCall.args[0];
+          expect(callChildTagName).toEqual(dirTag.toUpperCase());
         });
       });
 
