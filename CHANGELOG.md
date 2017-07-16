@@ -1,3 +1,8 @@
+## v1.5.2
+
+* Support [Login Button](https://developers.facebook.com/docs/facebook-login/web/login-button) ([#78](https://github.com/pc035860/angular-easyfb/issues/78))
+* Support [Save Button](https://developers.facebook.com/docs/plugins/save) and [Embedded Comments](https://developers.facebook.com/docs/plugins/embedded-comments)
+
 ## v1.5.1
 
 * Bump bower version
