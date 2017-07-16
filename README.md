@@ -18,7 +18,7 @@ AngularJS + Facebook JavaScript SDK.
 
 * [API demo](http://plnkr.co/edit/qclqht?p=preview)
 * [API demo (promise version)](http://plnkr.co/edit/UMUtFc?p=preview)
-* [Built-in social plugin directives demo](http://plnkr.co/edit/1c5cWB?p=preview)
+* [Built-in social plugin directives demo](http://plnkr.co/edit/z8751z?p=preview)
 
 
 ## Getting started
@@ -246,7 +246,7 @@ Additionally, you can add an `onrender` parameter to the social plugin directive
   data-share="true"></div>
 ```
 
-[Demo (directives demonstration)](http://plnkr.co/edit/1c5cWB?p=preview)
+[Demo (directives demonstration)](http://plnkr.co/edit/z8751z?p=preview)
 
 [Demo2 (interpolated attributes)](http://plnkr.co/edit/gFM1LV?p=preview)
 
