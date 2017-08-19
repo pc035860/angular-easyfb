@@ -75,7 +75,7 @@ https://github.com/pc035860/angular-easyfb.git */
                     js = d.createElement("script");
                     js.id = id;
                     js.async = true;
-                    js.src = "//connect.facebook.net/" + ezfbLocale + "/sdk.js";
+                    js.src = "https://connect.facebook.net/" + ezfbLocale + "/sdk.js";
                     ref.parentNode.insertBefore(js, ref);
                 };
                 $timeout(insertScript, 0, false);
