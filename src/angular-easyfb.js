@@ -92,11 +92,11 @@
       // version information: https://developers.facebook.com/docs/apps/changelog/
       version    : 'v2.6'
     };
-    
+
     /**
      * Default load SDK function
      *
-     * Injectable local: 
+     * Injectable local:
      *   ezfbAsyncInit - module's private trigger of FB.init, should always be called to complete the ezfb init process
      *   ezfbLocale    - configured SDK locale
      */
@@ -123,11 +123,11 @@
     /**
      * Default init function
      *
-     * Injectable locals: 
+     * Injectable locals:
      *   ezfbInitParams - parameters provided by ezfbProvider.setInitParams() or ezfb.init()
      */
     var _defaultInitFunction = [
-                   '$window', 'ezfbInitParams', 
+                   '$window', 'ezfbInitParams',
           function ($window,   ezfbInitParams) {
             // Initialize the FB JS SDK
             $window.FB.init(ezfbInitParams);
@@ -181,7 +181,7 @@
       getLocale: function() {
         return _locale;
       },
-      
+
       setLoadSDKFunction: function (func) {
         if (angular.isArray(func) || angular.isFunction(func)) {
           _loadSDKFunction = func;
@@ -212,7 +212,7 @@
       $get: [
                '$window', '$q', '$document', '$parse', '$rootScope', '$injector', '$timeout',
       function ($window,   $q,   $document,   $parse,   $rootScope,   $injector,   $timeout) {
-        var _initReady, _initRenderReady, _ezfb, _savedListeners, 
+        var _initReady, _initRenderReady, _ezfb, _savedListeners,
             _paramsReady, ezfbAsyncInit;
 
         _savedListeners = {};
@@ -225,7 +225,7 @@
 
         _initReady = $q.defer();
         _initRenderReady = $q.defer();
-        
+
         /**
          * #fb-root check & create
          */
@@ -240,7 +240,7 @@
 
             if (_initParams.xfbml) {
               // with first-time xfbml parsing parameter
-              
+
               var onRender = function () {
                 // console.log('on render');
                 _ezfb.$$xfbmlRendered = true;
@@ -320,7 +320,7 @@
 
               /**
                * Add or replce original callback function with deferred resolve
-               * 
+               *
                * @param  {number} index expected api callback index
                */
               replaceCallbackAt = function (index) {
@@ -433,7 +433,7 @@
             }
             else if (cbArgIndex === NO_CALLBACK) {
               // Do not return promise for no-callback apis
-              _initReady.promise.then(apiCall); 
+              _initReady.promise.then(apiCall);
             }
             else {
               return _initReady.promise.then(apiCall);
@@ -477,7 +477,7 @@
                   if (onrenderExp) {
                     scope.$eval(onrenderExp);
                   }
-                  
+
                   _rendering = false;
                 }
               };
@@ -591,7 +591,7 @@
     // Adpative width plugins
     // e.g. https://developers.facebook.com/docs/plugins/page-plugin#adaptive-width
     var PLUGINS_WITH_ADAPTIVE_WIDTH = ['fbPage', 'fbComments'];
-    
+
     /**
      * Wrap-related functions
      */
@@ -612,7 +612,7 @@
           $parent.after($elm).remove();
           return $elm;
         };
-    
+
     module.directive(dirName, [
              'ezfb', '$q', '$document',
     function (ezfb,   $q,   $document) {
@@ -667,7 +667,7 @@
 
 
             // Unwrap on $destroy
-            iElm.bind('$destroy', function () {
+            iElm.on('$destroy', function () {
               if (_isWrapped(iElm)) {
                 _unwrap(iElm);
               }
