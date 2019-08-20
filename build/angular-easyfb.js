@@ -1,6 +1,6 @@
 /*! angular-easyfb
-version: 1.5.2
-build date: 2017-07-15
+version: 1.6.0
+build date: 2019-08-20
 author: Robin Fan
 https://github.com/pc035860/angular-easyfb.git */
 (function(module) {
@@ -383,7 +383,7 @@ https://github.com/pc035860/angular-easyfb.git */
                                 }
                             }, true);
                         });
-                        iElm.bind("$destroy", function() {
+                        iElm.on("$destroy", function() {
                             if (_isWrapped(iElm)) {
                                 _unwrap(iElm);
                             }

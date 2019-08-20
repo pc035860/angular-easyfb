@@ -1,3 +1,7 @@
+## v1.6.0
+
+- Support jQuery 3 through migrating deprecated `.bind` to `.on` ([#84](https://github.com/pc035860/angular-easyfb/pull/84))
+
 ## v1.5.2
 
 * Support [Login Button](https://developers.facebook.com/docs/facebook-login/web/login-button) ([#78](https://github.com/pc035860/angular-easyfb/issues/78))
